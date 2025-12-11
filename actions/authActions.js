@@ -1,11 +1,34 @@
 'use server'
 import { cookies } from "next/headers";
 import { redirect } from 'next/navigation';
+import { getPocketbase } from "@/database";
 
 export async function Login(formData) {
+  const database = await getPocketbase();
+  let user = {};
   const cookieStore = await cookies();
+  const username = String(formData.get('username') || '');
   const submitted = String(formData.get('passcode') || '');
   const to = String(formData.get('returnTo') || '/');
+
+  // try to fetch the requested user and check if its valid
+  try {
+    let record = await database.collection('users').getFullList({
+      filter: `email = "${username}"`,
+    });
+    if (record) {
+      user = record[0];
+    } else {
+      user = null;
+    }
+  } catch (error) {
+    console.log(error.message)
+  }
+
+  // if username doesnt exist, give error
+  if (user === null || user === undefined) {
+    redirect(`/login?error=1&returnTo=${encodeURIComponent(to)}`);
+  }
 
   //wrong passcode, redirect back with error flag
   if (submitted !== process.env.SITE_PASSCODE) {
@@ -24,7 +47,7 @@ export async function Login(formData) {
   });
 
   // Go to the originall requested page or the admin
-  redirect('/admin');
+  redirect('/admin' || returnTo);
 }
 
 export async function Logout(redirectTo = '/login') {

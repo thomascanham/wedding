@@ -1,4 +1,4 @@
-import { Paper, Text, PasswordInput, Button, Stack, Alert, Container } from '@mantine/core';
+import { Paper, Text, PasswordInput, TextInput, Button, Stack, Alert, Container } from '@mantine/core';
 import { Login } from '@/actions/authActions';
 
 export const metadata = {
@@ -11,40 +11,40 @@ export default async function LoginPage({ searchParams }) {
   const returnTo = (parameters && parameters.returnTo) || '/';
   const error = parameters?.error;
 
-
   return (
-    <Container size="xs">
+    <Container size="md">
       <Stack align="center" justify="center" style={{ minHeight: '100vh' }}>
-        <Paper withBorder shadow="md" p="xl" radius="sm" style={{ width: '100%' }}>
+        <Paper withBorder shadow="md" p="xl" radius="md" style={{ border: '2px solid var(--custom-theme-text)', width: '100%', maxWidth: 600 }}>
           <Stack>
-            {/* <Title order={2} ta="center">Project Sentinel</Title> */}
-            <Text c={"var(--custom-theme-text"} ta="center" size="sm" mb="xl">
-              Please enter your password to log in
-            </Text>
 
             {error ? (
-              <Alert color="red" variant="light">
-                Incorrect password. Please try again.
+              <Alert color="red" title="Login Failed" variant="light" style={{ width: '100%' }}>
+                Incorrect login details
               </Alert>
             ) : null}
 
-            <form action={Login} style={{ display: 'grid', gap: '1.75rem' }}>
+            <form action={Login}>
               <input type="hidden" name="returnTo" value={returnTo} />
+
+              <TextInput
+                name="username"
+                placeholder="username"
+                required
+                size="lg"
+                py="lg"
+              />
+
               <PasswordInput
                 name="passcode"
-                label="Password"
-                placeholder="••••••••"
+                placeholder="Password"
                 required
-                size="md"
+                size="lg"
+                py="lg"
               />
-              <Button type="submit" fullWidth size="md" variant='outline' color='var(--custom-theme-heading)'>
+              <Button type="submit" fullWidth size="md" my="lg" variant='outline' color='var(--custom-theme-heading)'>
                 Sign In
               </Button>
             </form>
-
-            <Text c="dimmed" size="xs" ta="center">
-              You will have to log back in 30 days from now
-            </Text>
           </Stack>
         </Paper>
       </Stack>
