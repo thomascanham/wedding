@@ -1,13 +1,9 @@
-import { Button } from "@mantine/core";
-import { Logout } from "@/actions/authActions";
+import { Paper, Title } from "@mantine/core";
 
 export default function AdminDashboard() {
   return (
-    <>
-      <h1>Admin Page</h1>
-      <form action={Logout}>
-        <Button type="submit">Log Out</Button>
-      </form>
-    </>
+    <Paper py="xl" bg="transparent">
+      <Title c="var(--custom-theme-heading)" ff="heading">Admin Dashboard</Title>
+    </Paper>
   )
 }

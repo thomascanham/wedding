@@ -1,0 +1,9 @@
+.navbar {
+  box-sizing: border-box;
+  border-bottom: 2px solid var(--custom-theme-text);
+  background-color: var(--custom-theme-fill);
+  color: var(--custom-theme-text);
+  a {
+    color: var(--custom-theme-text)
+  }
+}
