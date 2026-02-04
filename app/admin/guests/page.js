@@ -1,16 +1,16 @@
-import { Paper, Title, Group, Alert } from "@mantine/core";
+import { Paper, Title, Group } from "@mantine/core";
 import { fetchAllGuests } from "@/actions/guestActions";
-import GuestGrid from "@/components/admin/layout/GuestGrid";
+import GuestFilters from "@/components/admin/guests/GuestFilters";
 
 export default async function AdminDashboard() {
   const data = await fetchAllGuests();
 
   return (
     <Paper py="xl" bg="transparent">
-      <Group justify="space-between" align="center">
+      <Group justify="space-between" align="center" mb="md">
         <Title c="var(--custom-theme-heading)" ff="heading">Guest Dashboard</Title>
       </Group>
-      <GuestGrid data={data} />
+      <GuestFilters data={data} />
     </Paper>
   )
 }

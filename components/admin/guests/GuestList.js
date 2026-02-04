@@ -1,20 +1,92 @@
 'use client'
-import { Avatar, Button, Paper, Text, Group, ThemeIcon, Tooltip, Drawer, Stack, Badge, Divider } from '@mantine/core';
+import { Alert, Table, Badge, Text, Avatar, Group, Drawer, Stack, Divider } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
-import { IconPhoto, IconMessageReply, IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle } from '@tabler/icons-react';
+import { useState } from 'react';
+import { IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle } from '@tabler/icons-react';
 import getGuestInitials from '@/lib/getGuestInitials';
 
-export function GuestCard({ guest }) {
+export default function GuestList({ data }) {
+  const { data: guests, error } = data;
+  const [selectedGuest, setSelectedGuest] = useState(null);
   const [opened, { open, close }] = useDisclosure(false);
-  const attendance = guest.attendanceType === 'reception' ? 'Reception' : 'Ceremony';
-  const initials = getGuestInitials(guest.firstname, guest.surname)
+
+  if (error) {
+    return (
+      <Alert title="Error Fetching Guests" color="red" variant="filled">
+        {error.message}
+      </Alert>
+    )
+  }
+
+  const sortedGuests = [...guests].sort((a, b) => {
+    const nameA = (a.surname || a.name || '').toLowerCase();
+    const nameB = (b.surname || b.name || '').toLowerCase();
+    if (nameA < nameB) return -1;
+    if (nameA > nameB) return 1;
+    const firstA = (a.firstname || '').toLowerCase();
+    const firstB = (b.firstname || '').toLowerCase();
+    return firstA.localeCompare(firstB);
+  });
+
+  const handleRowClick = (guest) => {
+    setSelectedGuest(guest);
+    open();
+  };
+
+  const getRsvpBadge = (guest) => {
+    if (!guest.rsvpStatus) {
+      return <Badge color="gray" size="sm" ff="text">Not Replied</Badge>;
+    }
+    if (guest.rsvpStatus === 'attending') {
+      return <Badge color="green" size="sm" ff="text">Attending</Badge>;
+    }
+    return <Badge color="red" size="sm" ff="text">Not Attending</Badge>;
+  };
+
+  const rows = sortedGuests.map((guest) => {
+    const initials = getGuestInitials(guest.firstname, guest.surname);
+    const attendance = guest.attendanceType === 'reception' ? 'Reception' : 'Ceremony';
+
+    return (
+      <Table.Tr
+        key={guest.id}
+        style={{ cursor: 'pointer' }}
+        onClick={() => handleRowClick(guest)}
+      >
+        <Table.Td>
+          <Group gap="sm">
+            <Avatar
+              size={36}
+              radius={36}
+              color='var(--custom-theme-text)'
+              variant='outline'
+            >
+              {initials}
+            </Avatar>
+            <Text fw={500} ff="text" c="var(--custom-theme-heading)">{guest.name}</Text>
+          </Group>
+        </Table.Td>
+        <Table.Td>
+          <Badge color="var(--custom-theme-heading)" variant="light" size="sm" ff="text">
+            {attendance}
+          </Badge>
+        </Table.Td>
+        <Table.Td>{getRsvpBadge(guest)}</Table.Td>
+        <Table.Td>
+          <Badge color={guest.hasCheckedIn ? 'green' : 'gray'} size="sm" ff="text">
+            {guest.hasCheckedIn ? 'Yes' : 'No'}
+          </Badge>
+        </Table.Td>
+      </Table.Tr>
+    );
+  });
 
   return (
     <>
       <Drawer
         opened={opened}
         onClose={close}
-        title={<Text fw={700} size="xl" c="var(--custom-theme-heading)" ff="heading">{guest.name}</Text>}
+        title={selectedGuest && <Text fw={700} size="xl" c="var(--custom-theme-heading)" ff="heading">{selectedGuest.name}</Text>}
         position="right"
         size="md"
         styles={{
@@ -31,30 +103,39 @@ export function GuestCard({ guest }) {
           },
         }}
       >
-        <GuestDrawerContent guest={guest} />
+        {selectedGuest && <GuestDrawerContent guest={selectedGuest} />}
       </Drawer>
 
-      <Paper shadow="md" radius="md" withBorder p="lg" bg="white" style={{ border: '2px solid var(--custom-theme-heading)' }}>
-        <Avatar
-          size={60}
-          radius={60}
-          mx="auto"
-          color='var(--custom-theme-text)'
-          variant='outline'
-        >{initials}</Avatar>
-        <Text ta="center" fz="lg" fw={500} mt="md" ff={'text'} c="var(--custom-theme-heading)">
-          {guest.name}
-        </Text>
-        <Text ta="center" c="dimmed" fz="sm" ff={'text'}>
-          {attendance}
-        </Text>
-
-        <StatusIcons guest={guest} />
-
-        <Button fullWidth my="md" onClick={open} color='var(--custom-theme-heading)' variant='outline' ff="text">
-          View Guest
-        </Button>
-      </Paper>
+      <Table.ScrollContainer minWidth={500} py="xl">
+        <Table
+          highlightOnHover
+          verticalSpacing="md"
+          styles={{
+            table: {
+              backgroundColor: 'white',
+              borderRadius: 'var(--mantine-radius-md)',
+            },
+            thead: {
+              backgroundColor: 'var(--custom-theme-fill)',
+            },
+            th: {
+              color: 'var(--custom-theme-heading)',
+              fontFamily: 'var(--mantine-font-family-headings)',
+              fontWeight: 600,
+            },
+          }}
+        >
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Name</Table.Th>
+              <Table.Th>Guest Type</Table.Th>
+              <Table.Th>RSVP</Table.Th>
+              <Table.Th>Checked In</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>{rows}</Table.Tbody>
+        </Table>
+      </Table.ScrollContainer>
     </>
   );
 }
@@ -158,36 +239,4 @@ function GuestDrawerContent({ guest }) {
       )}
     </Stack>
   );
-}
-
-function StatusIcons({ guest }) {
-  const hasReplied = !!guest.rsvpStatus;
-  const isAttending = guest.rsvpStatus === 'attending';
-  const hasCheckedIn = guest.hasCheckedIn;
-
-  const getRsvpColor = () => {
-    if (!hasReplied) return 'gray';
-    return isAttending ? 'green' : 'red';
-  };
-
-  const getRsvpLabel = () => {
-    if (!hasReplied) return 'Not Replied';
-    return isAttending ? 'Attending' : 'Not Attending';
-  };
-
-  return (
-    <Group justify='center' pt="md">
-      <Tooltip label={getRsvpLabel()}>
-        <ThemeIcon variant="transparent" size="md" color={getRsvpColor()}>
-          <IconMessageReply style={{ width: '70%', height: '70%' }} />
-        </ThemeIcon>
-      </Tooltip>
-
-      <Tooltip label={hasCheckedIn ? 'Checked In' : 'Not Checked In'}>
-        <ThemeIcon variant="transparent" size="md" color={hasCheckedIn ? 'green' : 'gray'}>
-          <IconPhoto style={{ width: '70%', height: '70%' }} />
-        </ThemeIcon>
-      </Tooltip>
-    </Group>
-  )
 }

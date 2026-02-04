@@ -1,9 +1,12 @@
 import { Paper, Title, Group } from "@mantine/core";
 import RouteCards from "@/components/admin/dashboard/RouteCards";
 import daysUntilWedding from "@/lib/daysUntil";
+import { fetchAllGuests } from "@/actions/guestActions";
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
   const daysLeft = daysUntilWedding();
+  const guestData = await fetchAllGuests();
+  const guestCount = guestData.total || 0;
 
   return (
     <Paper py="xl" bg="transparent">
@@ -12,7 +15,7 @@ export default function AdminDashboard() {
         <Title order={4} c="var(--custom-theme-heading)" ff="heading">{daysLeft} days to go</Title>
       </Group>
 
-      <RouteCards />
+      <RouteCards guestCount={guestCount} />
     </Paper>
   )
 }

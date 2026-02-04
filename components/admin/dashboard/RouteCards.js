@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SimpleGrid, Title, Card, Avatar, Center, Text } from "@mantine/core";
+import { SimpleGrid, Title, Card, Avatar, Center, Text, Badge, Stack } from "@mantine/core";
 import { IconUser, IconMail, IconHotelService } from "@tabler/icons-react";
 
 const data = [
@@ -7,7 +7,9 @@ const data = [
     title: 'Manage Guests',
     description: 'Add, edit, and remove wedding guests.',
     icon: IconUser,
-    link: '/admin/guests'
+    link: '/admin/guests',
+    countKey: 'guestCount',
+    countLabel: 'guests'
   },
   {
     title: 'Manage Invites',
@@ -23,9 +25,9 @@ const data = [
   },
 ]
 
-const cards = data.map((item) => <CardLink key={item.title} data={item} />)
+export default function RouteCards({ guestCount }) {
+  const counts = { guestCount };
 
-export default function RouteCards() {
   return (
     <SimpleGrid
       py="xl"
@@ -33,21 +35,46 @@ export default function RouteCards() {
       spacing={{ base: 10, md: 'xl' }}
       verticalSpacing={{ base: 'md', sm: 'xl' }}
     >
-      {cards}
+      {data.map((item) => (
+        <CardLink
+          key={item.title}
+          data={item}
+          count={item.countKey ? counts[item.countKey] : null}
+        />
+      ))}
     </SimpleGrid>
   )
 }
 
-function CardLink({ data }) {
+function CardLink({ data, count }) {
   return (
-    <Link href={data.link}>
-      <Card ta="center" shadow="sm" withBorder py="xl" radius="md" style={{ border: '2px solid var(--custom-theme-heading)' }}>
+    <Link href={data.link} style={{ display: 'block', height: '100%' }}>
+      <Card ta="center" shadow="sm" withBorder py="xl" radius="md" h="100%" style={{ border: '2px solid var(--custom-theme-heading)' }}>
         <Center>
-          <Avatar variant="transparent" radius="xl" size="lg" color="#721F14">
-            <data.icon size="lg" />
-          </Avatar>
+          <Stack align="center" gap={8}>
+            <Avatar variant="transparent" radius="xl" size="lg" color="#721F14">
+              <data.icon size="lg" />
+            </Avatar>
+            <Badge
+              variant="outline"
+              color="var(--custom-theme-heading)"
+              size="md"
+              ff="text"
+              style={{ visibility: count !== null ? 'visible' : 'hidden' }}
+              styles={{
+                root: {
+                  borderWidth: 1.5,
+                },
+                label: {
+                  fontWeight: 600,
+                },
+              }}
+            >
+              {count !== null ? `${count} ${data.countLabel}` : 'placeholder'}
+            </Badge>
+          </Stack>
         </Center>
-        <Title pt="xl" order={3} size="h3" c="var(--custom-theme-heading)">{data.title}</Title>
+        <Title pt="md" order={3} size="h3" c="var(--custom-theme-heading)">{data.title}</Title>
         <Text c="dimmed" fz={14} py="md">{data.description}</Text>
       </Card>
     </Link>
