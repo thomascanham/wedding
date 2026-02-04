@@ -22,3 +22,47 @@ export async function fetchAllGuests() {
     }
   }
 }
+
+export async function createGuest(firstname, surname, attendanceType) {
+  try {
+    const record = await database.collection('guests').create({
+      firstname,
+      surname,
+      name: `${firstname} ${surname}`,
+      attendanceType,
+      rsvpStatus: null,
+      hasCheckedIn: false,
+      phone: null,
+      email: null,
+      starter: null,
+      main: null,
+      dessert: null,
+      dietry: null,
+      allergies: null,
+    });
+    return {
+      data: record,
+      error: false,
+    }
+  } catch (error) {
+    return {
+      data: null,
+      error: { message: error.message },
+    }
+  }
+}
+
+export async function deleteGuest(id) {
+  try {
+    await database.collection('guests').delete(id);
+    return {
+      success: true,
+      error: false,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: { message: error.message },
+    }
+  }
+}

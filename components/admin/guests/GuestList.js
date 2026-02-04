@@ -1,14 +1,29 @@
 'use client'
-import { Alert, Table, Badge, Text, Avatar, Group, Drawer, Stack, Divider } from "@mantine/core";
+import { useRouter } from 'next/navigation';
+import { Alert, Table, Badge, Text, Avatar, Group, Drawer, Stack, Divider, Modal, Button } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
 import { useState } from 'react';
-import { IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle } from '@tabler/icons-react';
+import { IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle, IconTrash } from '@tabler/icons-react';
 import getGuestInitials from '@/lib/getGuestInitials';
+import { deleteGuest } from '@/actions/guestActions';
 
 export default function GuestList({ data }) {
+  const router = useRouter();
   const { data: guests, error } = data;
   const [selectedGuest, setSelectedGuest] = useState(null);
   const [opened, { open, close }] = useDisclosure(false);
+  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleDelete = async () => {
+    if (!selectedGuest) return;
+    setLoading(true);
+    await deleteGuest(selectedGuest.id);
+    setLoading(false);
+    closeDeleteModal();
+    close();
+    router.refresh();
+  };
 
   if (error) {
     return (
@@ -83,6 +98,32 @@ export default function GuestList({ data }) {
 
   return (
     <>
+      <Modal
+        opened={deleteModalOpened}
+        onClose={closeDeleteModal}
+        title={<Text fw={700} size="lg" c="var(--custom-theme-heading)" ff="heading">Delete Guest</Text>}
+        centered
+        zIndex={300}
+        styles={{
+          content: { backgroundColor: 'var(--custom-theme-fill)' },
+          header: { backgroundColor: 'var(--custom-theme-fill)' },
+        }}
+      >
+        <Stack gap="md">
+          <Text c="var(--custom-theme-text)" ff="text">
+            Are you sure you want to delete {selectedGuest?.name}? This action cannot be undone.
+          </Text>
+          <Group justify="flex-end" gap="sm">
+            <Button variant="outline" color="var(--custom-theme-heading)" onClick={closeDeleteModal}>
+              Cancel
+            </Button>
+            <Button color="red" onClick={handleDelete} loading={loading}>
+              Delete
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
       <Drawer
         opened={opened}
         onClose={close}
@@ -103,7 +144,7 @@ export default function GuestList({ data }) {
           },
         }}
       >
-        {selectedGuest && <GuestDrawerContent guest={selectedGuest} />}
+        {selectedGuest && <GuestDrawerContent guest={selectedGuest} onDelete={openDeleteModal} />}
       </Drawer>
 
       <Table.ScrollContainer minWidth={500} py="xl">
@@ -140,7 +181,7 @@ export default function GuestList({ data }) {
   );
 }
 
-function GuestDrawerContent({ guest }) {
+function GuestDrawerContent({ guest, onDelete }) {
   const attendance = guest.attendanceType === 'reception' ? 'Reception' : 'Ceremony';
 
   const getRsvpBadge = () => {
@@ -237,6 +278,18 @@ function GuestDrawerContent({ guest }) {
           )}
         </>
       )}
+
+      <Divider label="Actions" labelPosition="left" styles={dividerStyles} />
+
+      <Button
+        variant="outline"
+        color="red"
+        leftSection={<IconTrash size={18} />}
+        onClick={onDelete}
+        fullWidth
+      >
+        Delete Guest
+      </Button>
     </Stack>
   );
 }

@@ -15,7 +15,9 @@ const data = [
     title: 'Manage Invites',
     description: 'Add, edit, and remove wedding invites.',
     icon: IconMail,
-    link: '/admin/invites'
+    link: '/admin/invites',
+    countKey: 'inviteCount',
+    countLabel: 'invites'
   },
   {
     title: 'Manage Rooms',
@@ -25,8 +27,8 @@ const data = [
   },
 ]
 
-export default function RouteCards({ guestCount }) {
-  const counts = { guestCount };
+export default function RouteCards({ guestCount, inviteCount }) {
+  const counts = { guestCount, inviteCount };
 
   return (
     <SimpleGrid

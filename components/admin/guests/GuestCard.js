@@ -1,16 +1,57 @@
 'use client'
-import { Avatar, Button, Paper, Text, Group, ThemeIcon, Tooltip, Drawer, Stack, Badge, Divider } from '@mantine/core';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Avatar, Button, Paper, Text, Group, ThemeIcon, Tooltip, Drawer, Stack, Badge, Divider, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconPhoto, IconMessageReply, IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle } from '@tabler/icons-react';
+import { IconPhoto, IconMessageReply, IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle, IconTrash } from '@tabler/icons-react';
 import getGuestInitials from '@/lib/getGuestInitials';
+import { deleteGuest } from '@/actions/guestActions';
 
 export function GuestCard({ guest }) {
+  const router = useRouter();
   const [opened, { open, close }] = useDisclosure(false);
+  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const [loading, setLoading] = useState(false);
   const attendance = guest.attendanceType === 'reception' ? 'Reception' : 'Ceremony';
-  const initials = getGuestInitials(guest.firstname, guest.surname)
+  const initials = getGuestInitials(guest.firstname, guest.surname);
+
+  const handleDelete = async () => {
+    setLoading(true);
+    await deleteGuest(guest.id);
+    setLoading(false);
+    closeDeleteModal();
+    close();
+    router.refresh();
+  };
 
   return (
     <>
+      <Modal
+        opened={deleteModalOpened}
+        onClose={closeDeleteModal}
+        title={<Text fw={700} size="lg" c="var(--custom-theme-heading)" ff="heading">Delete Guest</Text>}
+        centered
+        zIndex={300}
+        styles={{
+          content: { backgroundColor: 'var(--custom-theme-fill)' },
+          header: { backgroundColor: 'var(--custom-theme-fill)' },
+        }}
+      >
+        <Stack gap="md">
+          <Text c="var(--custom-theme-text)" ff="text">
+            Are you sure you want to delete {guest.name}? This action cannot be undone.
+          </Text>
+          <Group justify="flex-end" gap="sm">
+            <Button variant="outline" color="var(--custom-theme-heading)" onClick={closeDeleteModal}>
+              Cancel
+            </Button>
+            <Button color="red" onClick={handleDelete} loading={loading}>
+              Delete
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
       <Drawer
         opened={opened}
         onClose={close}
@@ -31,7 +72,7 @@ export function GuestCard({ guest }) {
           },
         }}
       >
-        <GuestDrawerContent guest={guest} />
+        <GuestDrawerContent guest={guest} onDelete={openDeleteModal} />
       </Drawer>
 
       <Paper shadow="md" radius="md" withBorder p="lg" bg="white" style={{ border: '2px solid var(--custom-theme-heading)' }}>
@@ -59,7 +100,7 @@ export function GuestCard({ guest }) {
   );
 }
 
-function GuestDrawerContent({ guest }) {
+function GuestDrawerContent({ guest, onDelete }) {
   const attendance = guest.attendanceType === 'reception' ? 'Reception' : 'Ceremony';
 
   const getRsvpBadge = () => {
@@ -156,6 +197,18 @@ function GuestDrawerContent({ guest }) {
           )}
         </>
       )}
+
+      <Divider label="Actions" labelPosition="left" styles={dividerStyles} />
+
+      <Button
+        variant="outline"
+        color="red"
+        leftSection={<IconTrash size={18} />}
+        onClick={onDelete}
+        fullWidth
+      >
+        Delete Guest
+      </Button>
     </Stack>
   );
 }
