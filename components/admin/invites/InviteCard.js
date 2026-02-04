@@ -16,6 +16,7 @@ import {
   Divider,
   Tooltip,
   Modal,
+  TextInput,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconMail, IconMailOff, IconTrash, IconUsers, IconUserPlus } from '@tabler/icons-react';
@@ -26,6 +27,7 @@ export default function InviteCard({ invite, allGuests }) {
   const router = useRouter();
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const [inviteName, setInviteName] = useState(invite.name || '');
   const [selectedGuests, setSelectedGuests] = useState(invite.guest || []);
   const [attendance, setAttendance] = useState(invite.attendance || 'ceremony');
   const [loading, setLoading] = useState(false);
@@ -54,6 +56,7 @@ export default function InviteCard({ invite, allGuests }) {
   };
 
   const handleOpenDrawer = () => {
+    setInviteName(invite.name || '');
     setSelectedGuests(invite.guest || []);
     setAttendance(invite.attendance || 'ceremony');
     openDrawer();
@@ -61,7 +64,7 @@ export default function InviteCard({ invite, allGuests }) {
 
   const handleSaveChanges = async () => {
     setLoading(true);
-    await updateInvite(invite.id, { attendance });
+    await updateInvite(invite.id, { name: inviteName, attendance });
     await addGuestToInvite(invite.id, selectedGuests);
     setLoading(false);
     closeDrawer();
@@ -119,6 +122,18 @@ export default function InviteCard({ invite, allGuests }) {
               {invite.sent ? 'Sent' : 'Not Sent'}
             </Badge>
           </Group>
+
+          <TextInput
+            label="Invite Name"
+            value={inviteName}
+            onChange={(e) => setInviteName(e.target.value)}
+            styles={{
+              label: {
+                color: 'var(--custom-theme-text)',
+                fontFamily: 'var(--mantine-font-family)',
+              },
+            }}
+          />
 
           <Select
             label="Attendance Type"

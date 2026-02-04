@@ -17,15 +17,23 @@ import {
   Box,
   ActionIcon,
   Badge,
+  Tooltip,
 } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { IconPlus, IconX } from '@tabler/icons-react';
+import { useDisclosure, useLocalStorage } from '@mantine/hooks';
+import { IconPlus, IconX, IconLayoutGrid, IconList } from '@tabler/icons-react';
 import { createInvite } from '@/actions/inviteActions';
 import { createGuest } from '@/actions/guestActions';
 import InviteCard from './InviteCard';
+import InviteList from './InviteList';
+
+const VIEW_STORAGE_KEY = 'invite-view-type';
 
 export default function InviteManager({ invitesData, guestsData }) {
   const router = useRouter();
+  const [viewType, setViewType] = useLocalStorage({
+    key: VIEW_STORAGE_KEY,
+    defaultValue: 'grid',
+  });
   const [opened, { open, close }] = useDisclosure(false);
   const [inviteName, setInviteName] = useState('');
   const [inviteAttendance, setInviteAttendance] = useState('ceremony');
@@ -321,7 +329,31 @@ export default function InviteManager({ invitesData, guestsData }) {
         </Stack>
       </Drawer>
 
-      <Group justify="flex-end" mb="lg">
+      <Group justify="space-between" mb="lg">
+        <Group gap="xs">
+          <Tooltip label="Grid view">
+            <ActionIcon
+              variant={viewType === 'grid' ? 'filled' : 'outline'}
+              color="var(--custom-theme-heading)"
+              size="lg"
+              onClick={() => setViewType('grid')}
+              aria-label="Grid view"
+            >
+              <IconLayoutGrid size={20} />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label="List view">
+            <ActionIcon
+              variant={viewType === 'list' ? 'filled' : 'outline'}
+              color="var(--custom-theme-heading)"
+              size="lg"
+              onClick={() => setViewType('list')}
+              aria-label="List view"
+            >
+              <IconList size={20} />
+            </ActionIcon>
+          </Tooltip>
+        </Group>
         <Button
           leftSection={<IconPlus size={18} />}
           color="var(--custom-theme-heading)"
@@ -335,7 +367,7 @@ export default function InviteManager({ invitesData, guestsData }) {
         <Alert color="gray" variant="light">
           No invites yet. Create your first invite to get started.
         </Alert>
-      ) : (
+      ) : viewType === 'grid' ? (
         <SimpleGrid
           cols={{ base: 1, sm: 2, lg: 3 }}
           spacing={{ base: 10, sm: 'xl' }}
@@ -345,6 +377,8 @@ export default function InviteManager({ invitesData, guestsData }) {
             <InviteCard key={invite.id} invite={invite} allGuests={allAvailableGuests} />
           ))}
         </SimpleGrid>
+      ) : (
+        <InviteList data={invitesData} allGuests={allAvailableGuests} />
       )}
     </>
   );
