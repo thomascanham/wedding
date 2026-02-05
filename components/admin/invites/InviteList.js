@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Alert, Table, Badge, Text, Group, Drawer, Stack, Divider, Button, MultiSelect, Select, Modal, TextInput, Box, Center } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
 import { IconUsers, IconTrash, IconMail, IconMailOff, IconQrcode } from '@tabler/icons-react';
-import { updateInvite, deleteInvite, addGuestToInvite, generateQRCode } from '@/actions/inviteActions';
+import { updateInvite, deleteInvite, addGuestToInvite, generateQRCode, deleteQRCode } from '@/actions/inviteActions';
 
 export default function InviteList({ data, allGuests }) {
   const router = useRouter();
@@ -83,6 +83,15 @@ export default function InviteList({ data, allGuests }) {
     if (result.data?.qr_svg) {
       setQrSvg(result.data.qr_svg);
     }
+    setQrLoading(false);
+    router.refresh();
+  };
+
+  const handleDeleteQR = async () => {
+    if (!selectedInvite) return;
+    setQrLoading(true);
+    await deleteQRCode(selectedInvite.id);
+    setQrSvg(null);
     setQrLoading(false);
     router.refresh();
   };
@@ -257,6 +266,19 @@ export default function InviteList({ data, allGuests }) {
             >
               {qrSvg ? 'Regenerate QR Code' : 'Generate QR Code'}
             </Button>
+
+            {qrSvg && (
+              <Button
+                variant="light"
+                color="red"
+                leftSection={<IconTrash size={18} />}
+                onClick={handleDeleteQR}
+                loading={qrLoading}
+                fullWidth
+              >
+                Delete QR Code
+              </Button>
+            )}
 
             <Divider label="Actions" labelPosition="left" styles={dividerStyles} />
 

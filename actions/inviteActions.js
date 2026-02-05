@@ -101,6 +101,23 @@ export async function addGuestToInvite(inviteId, guestIds) {
   }
 }
 
+export async function deleteQRCode(inviteId) {
+  try {
+    const record = await database.collection('invites').update(inviteId, {
+      qr_svg: null,
+    });
+    return {
+      data: record,
+      error: false,
+    }
+  } catch (error) {
+    return {
+      data: null,
+      error: { message: error.message },
+    }
+  }
+}
+
 export async function generateQRCode(inviteId, baseUrl) {
   try {
     const inviteUrl = `${baseUrl}/invite/${inviteId}`;

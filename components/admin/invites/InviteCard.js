@@ -22,7 +22,7 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconMail, IconMailOff, IconTrash, IconUsers, IconQrcode } from '@tabler/icons-react';
-import { updateInvite, deleteInvite, addGuestToInvite, generateQRCode } from '@/actions/inviteActions';
+import { updateInvite, deleteInvite, addGuestToInvite, generateQRCode, deleteQRCode } from '@/actions/inviteActions';
 import getGuestInitials from '@/lib/getGuestInitials';
 
 export default function InviteCard({ invite, allGuests }) {
@@ -82,6 +82,14 @@ export default function InviteCard({ invite, allGuests }) {
     if (result.data?.qr_svg) {
       setQrSvg(result.data.qr_svg);
     }
+    setQrLoading(false);
+    router.refresh();
+  };
+
+  const handleDeleteQR = async () => {
+    setQrLoading(true);
+    await deleteQRCode(invite.id);
+    setQrSvg(null);
     setQrLoading(false);
     router.refresh();
   };
@@ -243,6 +251,19 @@ export default function InviteCard({ invite, allGuests }) {
           >
             {qrSvg ? 'Regenerate QR Code' : 'Generate QR Code'}
           </Button>
+
+          {qrSvg && (
+            <Button
+              variant="light"
+              color="red"
+              leftSection={<IconTrash size={18} />}
+              onClick={handleDeleteQR}
+              loading={qrLoading}
+              fullWidth
+            >
+              Delete QR Code
+            </Button>
+          )}
 
           <Divider
             label="Actions"
