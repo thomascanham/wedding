@@ -3,7 +3,53 @@
   border-bottom: 2px solid var(--custom-theme-text);
   background-color: var(--custom-theme-fill);
   color: var(--custom-theme-text);
-  a {
-    color: var(--custom-theme-text)
+}
+
+.navbar a {
+  color: var(--custom-theme-text);
+}
+
+.icon {
+  color: var(--custom-theme-text);
+}
+
+.activeLink {
+  color: var(--custom-theme-heading);
+  position: relative;
+}
+
+.activeLink::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--custom-theme-heading);
+}
+
+.activeMobileLink {
+  padding-left: 12px;
+  border-left: 3px solid var(--custom-theme-heading);
+}
+
+/* Desktop navigation - hidden on mobile */
+.desktopNav {
+  display: none;
+}
+
+/* Burger menu - shown on mobile */
+.burger {
+  display: block;
+}
+
+/* Tablet and up (768px+) */
+@media (min-width: 768px) {
+  .desktopNav {
+    display: flex;
+  }
+
+  .burger {
+    display: none;
   }
 }

@@ -1,7 +1,18 @@
 'use server';
 import { getPocketbase } from "@/database";
+import QRCode from 'qrcode';
 
 const database = await getPocketbase();
+
+const QR_OPTIONS = {
+  type: 'svg',
+  color: {
+    dark: '#721F14',
+    light: '#E9DDCD',
+  },
+  margin: 2,
+  width: 256,
+};
 
 export async function fetchAllInvites() {
   try {
@@ -80,6 +91,56 @@ export async function addGuestToInvite(inviteId, guestIds) {
     });
     return {
       data: record,
+      error: false,
+    }
+  } catch (error) {
+    return {
+      data: null,
+      error: { message: error.message },
+    }
+  }
+}
+
+export async function generateQRCode(inviteId, baseUrl) {
+  try {
+    const inviteUrl = `${baseUrl}/invite/${inviteId}`;
+    const svgString = await QRCode.toString(inviteUrl, QR_OPTIONS);
+
+    const record = await database.collection('invites').update(inviteId, {
+      qr_svg: svgString,
+    });
+
+    return {
+      data: record,
+      error: false,
+    }
+  } catch (error) {
+    return {
+      data: null,
+      error: { message: error.message },
+    }
+  }
+}
+
+export async function generateAllQRCodes(baseUrl) {
+  try {
+    const invites = await database.collection('invites').getFullList();
+    const results = [];
+
+    for (const invite of invites) {
+      const inviteUrl = `${baseUrl}/invite/${invite.id}`;
+      const svgString = await QRCode.toString(inviteUrl, QR_OPTIONS);
+
+      await database.collection('invites').update(invite.id, {
+        qr_svg: svgString,
+      });
+
+      results.push({ id: invite.id, name: invite.name });
+    }
+
+    return {
+      data: results,
+      total: results.length,
       error: false,
     }
   } catch (error) {

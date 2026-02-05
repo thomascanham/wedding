@@ -20,8 +20,8 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { useDisclosure, useLocalStorage } from '@mantine/hooks';
-import { IconPlus, IconX, IconLayoutGrid, IconList } from '@tabler/icons-react';
-import { createInvite } from '@/actions/inviteActions';
+import { IconPlus, IconX, IconLayoutGrid, IconList, IconQrcode } from '@tabler/icons-react';
+import { createInvite, generateAllQRCodes } from '@/actions/inviteActions';
 import { createGuest } from '@/actions/guestActions';
 import InviteCard from './InviteCard';
 import InviteList from './InviteList';
@@ -40,6 +40,7 @@ export default function InviteManager({ invitesData, guestsData }) {
   const [selectedGuests, setSelectedGuests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [qrAllLoading, setQrAllLoading] = useState(false);
 
   // Inline guest creation state
   const [showNewGuestForm, setShowNewGuestForm] = useState(false);
@@ -134,6 +135,14 @@ export default function InviteManager({ invitesData, guestsData }) {
     setNewGuestError(null);
     setError(null);
     close();
+  };
+
+  const handleGenerateAllQRCodes = async () => {
+    setQrAllLoading(true);
+    const baseUrl = window.location.origin;
+    await generateAllQRCodes(baseUrl);
+    setQrAllLoading(false);
+    router.refresh();
   };
 
   const labelStyles = {
@@ -354,13 +363,24 @@ export default function InviteManager({ invitesData, guestsData }) {
             </ActionIcon>
           </Tooltip>
         </Group>
-        <Button
-          leftSection={<IconPlus size={18} />}
-          color="var(--custom-theme-heading)"
-          onClick={open}
-        >
-          Create Invite
-        </Button>
+        <Group gap="sm">
+          <Button
+            variant="outline"
+            leftSection={<IconQrcode size={18} />}
+            color="var(--custom-theme-heading)"
+            onClick={handleGenerateAllQRCodes}
+            loading={qrAllLoading}
+          >
+            Generate All QR Codes
+          </Button>
+          <Button
+            leftSection={<IconPlus size={18} />}
+            color="var(--custom-theme-heading)"
+            onClick={open}
+          >
+            Create Invite
+          </Button>
+        </Group>
       </Group>
 
       {invites.length === 0 ? (

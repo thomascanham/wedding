@@ -1,10 +1,10 @@
 'use client'
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Alert, Table, Badge, Text, Group, Drawer, Stack, Divider, Button, MultiSelect, Select, Modal, TextInput } from "@mantine/core";
+import { Alert, Table, Badge, Text, Group, Drawer, Stack, Divider, Button, MultiSelect, Select, Modal, TextInput, Box, Center } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
-import { IconUsers, IconTrash, IconMail, IconMailOff } from '@tabler/icons-react';
-import { updateInvite, deleteInvite, addGuestToInvite } from '@/actions/inviteActions';
+import { IconUsers, IconTrash, IconMail, IconMailOff, IconQrcode } from '@tabler/icons-react';
+import { updateInvite, deleteInvite, addGuestToInvite, generateQRCode } from '@/actions/inviteActions';
 
 export default function InviteList({ data, allGuests }) {
   const router = useRouter();
@@ -16,6 +16,8 @@ export default function InviteList({ data, allGuests }) {
   const [selectedGuests, setSelectedGuests] = useState([]);
   const [attendance, setAttendance] = useState('ceremony');
   const [loading, setLoading] = useState(false);
+  const [qrLoading, setQrLoading] = useState(false);
+  const [qrSvg, setQrSvg] = useState(null);
 
   if (error) {
     return (
@@ -41,6 +43,7 @@ export default function InviteList({ data, allGuests }) {
     setInviteName(invite.name || '');
     setSelectedGuests(invite.guest || []);
     setAttendance(invite.attendance || 'ceremony');
+    setQrSvg(invite.qr_svg || null);
     open();
   };
 
@@ -69,6 +72,18 @@ export default function InviteList({ data, allGuests }) {
     setLoading(false);
     closeDeleteModal();
     close();
+    router.refresh();
+  };
+
+  const handleGenerateQR = async () => {
+    if (!selectedInvite) return;
+    setQrLoading(true);
+    const baseUrl = window.location.origin;
+    const result = await generateQRCode(selectedInvite.id, baseUrl);
+    if (result.data?.qr_svg) {
+      setQrSvg(result.data.qr_svg);
+    }
+    setQrLoading(false);
     router.refresh();
   };
 
@@ -220,6 +235,27 @@ export default function InviteList({ data, allGuests }) {
               fullWidth
             >
               Save Changes
+            </Button>
+
+            <Divider label="QR Code" labelPosition="left" styles={dividerStyles} />
+
+            {qrSvg && (
+              <Center>
+                <Box
+                  dangerouslySetInnerHTML={{ __html: qrSvg }}
+                />
+              </Center>
+            )}
+
+            <Button
+              variant="outline"
+              color="var(--custom-theme-heading)"
+              leftSection={<IconQrcode size={18} />}
+              onClick={handleGenerateQR}
+              loading={qrLoading}
+              fullWidth
+            >
+              {qrSvg ? 'Regenerate QR Code' : 'Generate QR Code'}
             </Button>
 
             <Divider label="Actions" labelPosition="left" styles={dividerStyles} />

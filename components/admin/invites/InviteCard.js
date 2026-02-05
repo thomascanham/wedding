@@ -17,10 +17,12 @@ import {
   Tooltip,
   Modal,
   TextInput,
+  Box,
+  Center,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconMail, IconMailOff, IconTrash, IconUsers, IconUserPlus } from '@tabler/icons-react';
-import { updateInvite, deleteInvite, addGuestToInvite } from '@/actions/inviteActions';
+import { IconMail, IconMailOff, IconTrash, IconUsers, IconQrcode } from '@tabler/icons-react';
+import { updateInvite, deleteInvite, addGuestToInvite, generateQRCode } from '@/actions/inviteActions';
 import getGuestInitials from '@/lib/getGuestInitials';
 
 export default function InviteCard({ invite, allGuests }) {
@@ -31,6 +33,8 @@ export default function InviteCard({ invite, allGuests }) {
   const [selectedGuests, setSelectedGuests] = useState(invite.guest || []);
   const [attendance, setAttendance] = useState(invite.attendance || 'ceremony');
   const [loading, setLoading] = useState(false);
+  const [qrLoading, setQrLoading] = useState(false);
+  const [qrSvg, setQrSvg] = useState(invite.qr_svg || null);
 
   const expandedGuests = invite.expand?.guest || [];
   const guestCount = expandedGuests.length;
@@ -68,6 +72,17 @@ export default function InviteCard({ invite, allGuests }) {
     await addGuestToInvite(invite.id, selectedGuests);
     setLoading(false);
     closeDrawer();
+    router.refresh();
+  };
+
+  const handleGenerateQR = async () => {
+    setQrLoading(true);
+    const baseUrl = window.location.origin;
+    const result = await generateQRCode(invite.id, baseUrl);
+    if (result.data?.qr_svg) {
+      setQrSvg(result.data.qr_svg);
+    }
+    setQrLoading(false);
     router.refresh();
   };
 
@@ -195,6 +210,38 @@ export default function InviteCard({ invite, allGuests }) {
             fullWidth
           >
             Save Changes
+          </Button>
+
+          <Divider
+            label="QR Code"
+            labelPosition="left"
+            styles={{
+              label: {
+                color: 'var(--custom-theme-heading)',
+                fontWeight: 600,
+                fontSize: 'var(--mantine-font-size-md)',
+                fontFamily: 'var(--mantine-font-family-headings)',
+              },
+            }}
+          />
+
+          {qrSvg && (
+            <Center>
+              <Box
+                dangerouslySetInnerHTML={{ __html: qrSvg }}
+              />
+            </Center>
+          )}
+
+          <Button
+            variant="outline"
+            color="var(--custom-theme-heading)"
+            leftSection={<IconQrcode size={18} />}
+            onClick={handleGenerateQR}
+            loading={qrLoading}
+            fullWidth
+          >
+            {qrSvg ? 'Regenerate QR Code' : 'Generate QR Code'}
           </Button>
 
           <Divider
