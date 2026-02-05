@@ -2,6 +2,8 @@ import { Paper, Title, Group } from "@mantine/core";
 import { fetchAllGuests } from "@/actions/guestActions";
 import GuestFilters from "@/components/admin/guests/GuestFilters";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboard() {
   const data = await fetchAllGuests();
 

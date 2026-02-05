@@ -60,9 +60,11 @@ export default function GuestFilters({ data }) {
     closeModal();
   };
 
+  const guestArray = Array.isArray(data?.data) ? data.data : [];
+
   const filteredData = {
     ...data,
-    data: data.data?.filter((guest) => {
+    data: guestArray.filter((guest) => {
       // Attendance type filter (ceremony/reception)
       if (attendanceFilter !== 'all' && guest.attendanceType !== attendanceFilter) {
         return false;
@@ -84,7 +86,7 @@ export default function GuestFilters({ data }) {
       }
 
       return true;
-    }) || []
+    })
   };
 
   const segmentedStyles = {
