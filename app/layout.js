@@ -1,4 +1,5 @@
 import "@mantine/core/styles.css";
+import "@mantine/tiptap/styles.css";
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from "@mantine/core";
 import { Playfair_Display, Raleway } from "next/font/google";
 import "./globals.css";

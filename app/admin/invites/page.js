@@ -10,7 +10,7 @@ export default async function InvitesPage() {
   return (
     <Paper py="xl" bg="transparent">
       <Group justify="space-between" align="center" mb="md">
-        <Title c="var(--custom-theme-heading)" ff="heading">Invite Dashboard</Title>
+        <Title c="var(--custom-theme-heading)" ff="heading">Invites</Title>
       </Group>
       <InviteManager invitesData={invitesData} guestsData={guestsData} />
     </Paper>

@@ -8,7 +8,7 @@ export default async function AdminDashboard() {
   return (
     <Paper py="xl" bg="transparent">
       <Group justify="space-between" align="center" mb="md">
-        <Title c="var(--custom-theme-heading)" ff="heading">Guest Dashboard</Title>
+        <Title c="var(--custom-theme-heading)" ff="heading">Guests</Title>
       </Group>
       <GuestFilters data={data} />
     </Paper>

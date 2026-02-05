@@ -14,7 +14,7 @@ export default async function AdminDashboard() {
   return (
     <Paper py="xl" bg="transparent">
       <Group justify="space-between" align="center">
-        <Title c="var(--custom-theme-heading)" ff="heading">Admin Dashboard</Title>
+        <Title c="var(--custom-theme-heading)" ff="heading">Dashboard</Title>
         <Title order={4} c="var(--custom-theme-heading)" ff="heading">{daysLeft} days to go</Title>
       </Group>
 

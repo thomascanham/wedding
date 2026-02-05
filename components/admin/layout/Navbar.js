@@ -12,6 +12,7 @@ const navLinks = [
   { label: 'Guests', href: '/admin/guests' },
   { label: 'Invites', href: '/admin/invites' },
   { label: 'Rooms', href: '/admin/rooms' },
+  { label: 'Comms', href: '/admin/comms' },
 ];
 
 export default function Navbar() {

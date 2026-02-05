@@ -1,11 +1,16 @@
 'use client'
 import { useRouter } from 'next/navigation';
-import { Alert, Table, Badge, Text, Avatar, Group, Drawer, Stack, Divider, Modal, Button } from "@mantine/core";
+import { Alert, Table, Badge, Text, Avatar, Group, Drawer, Stack, Divider, Modal, Button, TextInput } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
 import { useState } from 'react';
-import { IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle, IconTrash } from '@tabler/icons-react';
+import { RichTextEditor, Link } from '@mantine/tiptap';
+import { useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import TextAlign from '@tiptap/extension-text-align';
+import { IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle, IconTrash, IconSend } from '@tabler/icons-react';
 import getGuestInitials from '@/lib/getGuestInitials';
 import { deleteGuest } from '@/actions/guestActions';
+import { sendEmailToGuest } from '@/actions/emailActions';
 
 export default function GuestList({ data }) {
   const router = useRouter();
@@ -13,7 +18,22 @@ export default function GuestList({ data }) {
   const [selectedGuest, setSelectedGuest] = useState(null);
   const [opened, { open, close }] = useDisclosure(false);
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const [emailModalOpened, { open: openEmailModal, close: closeEmailModal }] = useDisclosure(false);
   const [loading, setLoading] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailError, setEmailError] = useState(null);
+  const [emailSuccess, setEmailSuccess] = useState(false);
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Link,
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+    ],
+    content: '<p>Dear Guest,</p><p></p><p>We hope this email finds you well.</p><p></p><p>Kind regards,</p><p>Tom & Sam</p>',
+    immediatelyRender: false,
+  });
 
   const handleDelete = async () => {
     if (!selectedGuest) return;
@@ -23,6 +43,47 @@ export default function GuestList({ data }) {
     closeDeleteModal();
     close();
     router.refresh();
+  };
+
+  const handleOpenEmailModal = () => {
+    if (selectedGuest) {
+      editor?.commands.setContent(`<p>Dear ${selectedGuest.firstname},</p><p></p><p>We hope this email finds you well.</p><p></p><p>Kind regards,</p><p>Tom & Sam</p>`);
+    }
+    openEmailModal();
+  };
+
+  const handleCloseEmailModal = () => {
+    setEmailSubject('');
+    setEmailError(null);
+    setEmailSuccess(false);
+    closeEmailModal();
+  };
+
+  const handleSendEmail = async () => {
+    if (!selectedGuest) return;
+
+    if (!emailSubject.trim()) {
+      setEmailError('Please enter a subject line');
+      return;
+    }
+
+    if (!editor?.getHTML() || editor.getHTML() === '<p></p>') {
+      setEmailError('Please enter email content');
+      return;
+    }
+
+    setEmailLoading(true);
+    setEmailError(null);
+
+    const response = await sendEmailToGuest(selectedGuest.email, emailSubject.trim(), editor.getHTML());
+
+    if (response.error) {
+      setEmailError(response.error.message);
+    } else {
+      setEmailSuccess(true);
+    }
+
+    setEmailLoading(false);
   };
 
   if (error) {
@@ -124,6 +185,134 @@ export default function GuestList({ data }) {
         </Stack>
       </Modal>
 
+      <Modal
+        opened={emailModalOpened}
+        onClose={handleCloseEmailModal}
+        title={<Text fw={700} size="xl" c="var(--custom-theme-heading)" ff="heading">Email {selectedGuest?.firstname}</Text>}
+        size="xl"
+        centered
+        zIndex={300}
+        styles={{
+          content: { backgroundColor: 'var(--custom-theme-fill)' },
+          header: {
+            backgroundColor: 'var(--custom-theme-fill)',
+            borderBottom: '2px solid var(--custom-theme-heading)',
+            paddingBottom: 'var(--mantine-spacing-md)',
+          },
+          close: { color: 'var(--custom-theme-heading)' },
+        }}
+      >
+        <Stack gap="md" pt="md">
+          <Group justify="space-between">
+            <Text size="sm" c="var(--custom-theme-text)" ff="text">
+              Sending to:
+            </Text>
+            <Badge color="var(--custom-theme-heading)" size="lg" ff="text">
+              {selectedGuest?.email}
+            </Badge>
+          </Group>
+
+          <TextInput
+            label="Subject"
+            placeholder="Enter email subject..."
+            value={emailSubject}
+            onChange={(e) => setEmailSubject(e.target.value)}
+            styles={{
+              label: {
+                color: 'var(--custom-theme-text)',
+                fontFamily: 'var(--mantine-font-family)',
+              },
+            }}
+          />
+
+          <div>
+            <Text size="sm" c="var(--custom-theme-text)" ff="text" mb="xs">
+              Message
+            </Text>
+            <RichTextEditor
+              editor={editor}
+              styles={{
+                root: {
+                  border: '1px solid var(--mantine-color-gray-4)',
+                  borderRadius: 'var(--mantine-radius-md)',
+                },
+                toolbar: {
+                  backgroundColor: 'white',
+                  borderBottom: '1px solid var(--mantine-color-gray-4)',
+                },
+                content: {
+                  backgroundColor: 'white',
+                  minHeight: 200,
+                },
+              }}
+            >
+              <RichTextEditor.Toolbar sticky stickyOffset={60}>
+                <RichTextEditor.ControlsGroup>
+                  <RichTextEditor.Bold />
+                  <RichTextEditor.Italic />
+                  <RichTextEditor.Underline />
+                  <RichTextEditor.Strikethrough />
+                </RichTextEditor.ControlsGroup>
+
+                <RichTextEditor.ControlsGroup>
+                  <RichTextEditor.H1 />
+                  <RichTextEditor.H2 />
+                  <RichTextEditor.H3 />
+                </RichTextEditor.ControlsGroup>
+
+                <RichTextEditor.ControlsGroup>
+                  <RichTextEditor.BulletList />
+                  <RichTextEditor.OrderedList />
+                </RichTextEditor.ControlsGroup>
+
+                <RichTextEditor.ControlsGroup>
+                  <RichTextEditor.AlignLeft />
+                  <RichTextEditor.AlignCenter />
+                  <RichTextEditor.AlignRight />
+                </RichTextEditor.ControlsGroup>
+
+                <RichTextEditor.ControlsGroup>
+                  <RichTextEditor.Link />
+                  <RichTextEditor.Unlink />
+                </RichTextEditor.ControlsGroup>
+              </RichTextEditor.Toolbar>
+
+              <RichTextEditor.Content />
+            </RichTextEditor>
+          </div>
+
+          {emailError && (
+            <Alert color="red" variant="light">
+              {emailError}
+            </Alert>
+          )}
+
+          {emailSuccess && (
+            <Alert color="green" variant="light">
+              Email sent successfully to {selectedGuest?.name}!
+            </Alert>
+          )}
+
+          <Group justify="flex-end" mt="md" gap="sm">
+            <Button
+              variant="outline"
+              color="gray"
+              onClick={handleCloseEmailModal}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="var(--custom-theme-heading)"
+              leftSection={<IconSend size={18} />}
+              onClick={handleSendEmail}
+              loading={emailLoading}
+            >
+              Send Email
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
       <Drawer
         opened={opened}
         onClose={close}
@@ -144,7 +333,7 @@ export default function GuestList({ data }) {
           },
         }}
       >
-        {selectedGuest && <GuestDrawerContent guest={selectedGuest} onDelete={openDeleteModal} />}
+        {selectedGuest && <GuestDrawerContent guest={selectedGuest} onDelete={openDeleteModal} onEmail={handleOpenEmailModal} />}
       </Drawer>
 
       <Table.ScrollContainer minWidth={500} py="xl">
@@ -181,7 +370,7 @@ export default function GuestList({ data }) {
   );
 }
 
-function GuestDrawerContent({ guest, onDelete }) {
+function GuestDrawerContent({ guest, onDelete, onEmail }) {
   const attendance = guest.attendanceType === 'reception' ? 'Reception' : 'Ceremony';
 
   const getRsvpBadge = () => {
@@ -280,6 +469,18 @@ function GuestDrawerContent({ guest, onDelete }) {
       )}
 
       <Divider label="Actions" labelPosition="left" styles={dividerStyles} />
+
+      {guest.email && (
+        <Button
+          variant="outline"
+          color="var(--custom-theme-heading)"
+          leftSection={<IconSend size={18} />}
+          onClick={onEmail}
+          fullWidth
+        >
+          Send Email
+        </Button>
+      )}
 
       <Button
         variant="outline"
