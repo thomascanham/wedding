@@ -52,6 +52,23 @@ export async function createGuest(firstname, surname, attendanceType) {
   }
 }
 
+export async function toggleGuestHoop(id, currentValue) {
+  try {
+    const record = await database.collection('guests').update(id, {
+      hoop: !currentValue,
+    });
+    return {
+      data: record,
+      error: false,
+    }
+  } catch (error) {
+    return {
+      data: null,
+      error: { message: error.message },
+    }
+  }
+}
+
 export async function deleteGuest(id) {
   try {
     await database.collection('guests').delete(id);

@@ -7,9 +7,9 @@ import { RichTextEditor, Link } from '@mantine/tiptap';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
-import { IconPhoto, IconMessageReply, IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle, IconTrash, IconSend } from '@tabler/icons-react';
+import { IconMapPin, IconMapPinFilled, IconUser, IconUserCheck, IconUserOff, IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle, IconTrash, IconSend, IconCircle } from '@tabler/icons-react';
 import getGuestInitials from '@/lib/getGuestInitials';
-import { deleteGuest } from '@/actions/guestActions';
+import { deleteGuest, toggleGuestHoop } from '@/actions/guestActions';
 import { sendEmailToGuest } from '@/actions/emailActions';
 
 export function GuestCard({ guest }) {
@@ -22,8 +22,19 @@ export function GuestCard({ guest }) {
   const [emailSubject, setEmailSubject] = useState('');
   const [emailError, setEmailError] = useState(null);
   const [emailSuccess, setEmailSuccess] = useState(false);
+  const [hoop, setHoop] = useState(guest.hoop);
+  const [hoopLoading, setHoopLoading] = useState(false);
   const attendance = guest.attendanceType === 'reception' ? 'Reception' : 'Ceremony';
   const initials = getGuestInitials(guest.firstname, guest.surname);
+
+  const handleToggleHoop = async () => {
+    setHoopLoading(true);
+    const response = await toggleGuestHoop(guest.id, hoop);
+    if (!response.error) {
+      setHoop(!hoop);
+    }
+    setHoopLoading(false);
+  };
 
   const editor = useEditor({
     extensions: [
@@ -253,7 +264,7 @@ export function GuestCard({ guest }) {
           },
         }}
       >
-        <GuestDrawerContent guest={guest} onDelete={openDeleteModal} onEmail={openEmailModal} />
+        <GuestDrawerContent guest={guest} onDelete={openDeleteModal} onEmail={openEmailModal} hoop={hoop} hoopLoading={hoopLoading} onToggleHoop={handleToggleHoop} />
       </Drawer>
 
       <Paper shadow="md" radius="md" withBorder p="lg" bg="white" style={{ border: '2px solid var(--custom-theme-heading)' }}>
@@ -271,7 +282,7 @@ export function GuestCard({ guest }) {
           {attendance}
         </Text>
 
-        <StatusIcons guest={guest} />
+        <StatusIcons guest={guest} hoop={hoop} />
 
         <Button fullWidth my="md" onClick={open} color='var(--custom-theme-heading)' variant='outline' ff="text">
           View Guest
@@ -281,7 +292,7 @@ export function GuestCard({ guest }) {
   );
 }
 
-function GuestDrawerContent({ guest, onDelete, onEmail }) {
+function GuestDrawerContent({ guest, onDelete, onEmail, hoop, hoopLoading, onToggleHoop }) {
   const attendance = guest.attendanceType === 'reception' ? 'Reception' : 'Ceremony';
 
   const getRsvpBadge = () => {
@@ -320,6 +331,25 @@ function GuestDrawerContent({ guest, onDelete, onEmail }) {
         <Badge color={guest.hasCheckedIn ? 'green' : 'gray'} size="lg" ff="text">
           {guest.hasCheckedIn ? 'Yes' : 'No'}
         </Badge>
+      </Group>
+
+      <Group justify="space-between">
+        <Text size="md" c="var(--custom-theme-text)" ff="text" fw={500}>Hoop</Text>
+        <Group gap="sm">
+          <Badge color={hoop ? 'green' : 'gray'} size="lg" ff="text">
+            {hoop ? 'Yes' : 'No'}
+          </Badge>
+          <Button
+            size="xs"
+            variant="outline"
+            color={hoop ? 'red' : 'green'}
+            onClick={onToggleHoop}
+            loading={hoopLoading}
+            ff="text"
+          >
+            {hoop ? 'Remove' : 'Add'}
+          </Button>
+        </Group>
       </Group>
 
       <Divider label="Contact" labelPosition="left" styles={dividerStyles} />
@@ -406,7 +436,7 @@ function GuestDrawerContent({ guest, onDelete, onEmail }) {
   );
 }
 
-function StatusIcons({ guest }) {
+function StatusIcons({ guest, hoop }) {
   const hasReplied = !!guest.rsvpStatus;
   const isAttending = guest.rsvpStatus === 'attending';
   const hasCheckedIn = guest.hasCheckedIn;
@@ -423,15 +453,29 @@ function StatusIcons({ guest }) {
 
   return (
     <Group justify='center' pt="md">
-      <Tooltip label={getRsvpLabel()}>
-        <ThemeIcon variant="transparent" size="md" color={getRsvpColor()}>
-          <IconMessageReply style={{ width: '70%', height: '70%' }} />
+      <Tooltip label={hasCheckedIn ? 'Checked In' : 'Not Checked In'}>
+        <ThemeIcon variant="transparent" size="md" color={hasCheckedIn ? 'green' : 'gray'}>
+          {hasCheckedIn
+            ? <IconMapPinFilled style={{ width: '70%', height: '70%' }} />
+            : <IconMapPin style={{ width: '70%', height: '70%' }} />
+          }
         </ThemeIcon>
       </Tooltip>
 
-      <Tooltip label={hasCheckedIn ? 'Checked In' : 'Not Checked In'}>
-        <ThemeIcon variant="transparent" size="md" color={hasCheckedIn ? 'green' : 'gray'}>
-          <IconPhoto style={{ width: '70%', height: '70%' }} />
+      <Tooltip label={getRsvpLabel()}>
+        <ThemeIcon variant="transparent" size="md" color={getRsvpColor()}>
+          {!hasReplied
+            ? <IconUser style={{ width: '70%', height: '70%' }} />
+            : isAttending
+              ? <IconUserCheck style={{ width: '70%', height: '70%' }} />
+              : <IconUserOff style={{ width: '70%', height: '70%' }} />
+          }
+        </ThemeIcon>
+      </Tooltip>
+
+      <Tooltip label={hoop ? 'Hoop' : 'No Hoop'}>
+        <ThemeIcon variant="transparent" size="md" color={hoop ? 'green' : 'gray'}>
+          <IconCircle style={{ width: '70%', height: '70%' }} />
         </ThemeIcon>
       </Tooltip>
     </Group>

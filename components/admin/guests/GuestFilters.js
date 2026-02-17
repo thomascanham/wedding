@@ -19,6 +19,7 @@ export default function GuestFilters({ data }) {
   const [attendanceFilter, setAttendanceFilter] = useState('all');
   const [rsvpFilter, setRsvpFilter] = useState('all');
   const [rsvpResponseFilter, setRsvpResponseFilter] = useState('all');
+  const [hoopFilter, setHoopFilter] = useState('all');
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [firstname, setFirstname] = useState('');
@@ -83,6 +84,14 @@ export default function GuestFilters({ data }) {
         if (guest.rsvpStatus !== rsvpResponseFilter) {
           return false;
         }
+      }
+
+      // Hoop filter
+      if (hoopFilter === 'yes' && !guest.hoop) {
+        return false;
+      }
+      if (hoopFilter === 'no' && guest.hoop) {
+        return false;
       }
 
       return true;
@@ -206,6 +215,21 @@ export default function GuestFilters({ data }) {
                 />
               </Box>
             )}
+
+            <Box>
+              <Text size="sm" fw={500} mb={4} c="var(--custom-theme-text)">Hoop</Text>
+              <SegmentedControl
+                value={hoopFilter}
+                onChange={setHoopFilter}
+                data={[
+                  { label: 'All', value: 'all' },
+                  { label: 'Yes', value: 'yes' },
+                  { label: 'No', value: 'no' },
+                ]}
+                color="var(--custom-theme-heading)"
+                styles={segmentedStyles}
+              />
+            </Box>
           </Group>
 
           <Group gap="md">

@@ -9,7 +9,7 @@ import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import { IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle, IconTrash, IconSend } from '@tabler/icons-react';
 import getGuestInitials from '@/lib/getGuestInitials';
-import { deleteGuest } from '@/actions/guestActions';
+import { deleteGuest, toggleGuestHoop } from '@/actions/guestActions';
 import { sendEmailToGuest } from '@/actions/emailActions';
 
 export default function GuestList({ data }) {
@@ -24,6 +24,8 @@ export default function GuestList({ data }) {
   const [emailSubject, setEmailSubject] = useState('');
   const [emailError, setEmailError] = useState(null);
   const [emailSuccess, setEmailSuccess] = useState(false);
+  const [hoop, setHoop] = useState(false);
+  const [hoopLoading, setHoopLoading] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -106,7 +108,18 @@ export default function GuestList({ data }) {
 
   const handleRowClick = (guest) => {
     setSelectedGuest(guest);
+    setHoop(guest.hoop);
     open();
+  };
+
+  const handleToggleHoop = async () => {
+    if (!selectedGuest) return;
+    setHoopLoading(true);
+    const response = await toggleGuestHoop(selectedGuest.id, hoop);
+    if (!response.error) {
+      setHoop(!hoop);
+    }
+    setHoopLoading(false);
   };
 
   const getRsvpBadge = (guest) => {
@@ -151,6 +164,11 @@ export default function GuestList({ data }) {
         <Table.Td>
           <Badge color={guest.hasCheckedIn ? 'green' : 'gray'} size="sm" ff="text">
             {guest.hasCheckedIn ? 'Yes' : 'No'}
+          </Badge>
+        </Table.Td>
+        <Table.Td>
+          <Badge color={guest.hoop ? 'green' : 'gray'} size="sm" ff="text">
+            {guest.hoop ? 'Yes' : 'No'}
           </Badge>
         </Table.Td>
       </Table.Tr>
@@ -333,7 +351,7 @@ export default function GuestList({ data }) {
           },
         }}
       >
-        {selectedGuest && <GuestDrawerContent guest={selectedGuest} onDelete={openDeleteModal} onEmail={handleOpenEmailModal} />}
+        {selectedGuest && <GuestDrawerContent guest={selectedGuest} onDelete={openDeleteModal} onEmail={handleOpenEmailModal} hoop={hoop} hoopLoading={hoopLoading} onToggleHoop={handleToggleHoop} />}
       </Drawer>
 
       <Table.ScrollContainer minWidth={500} py="xl">
@@ -361,6 +379,7 @@ export default function GuestList({ data }) {
               <Table.Th>Guest Type</Table.Th>
               <Table.Th>RSVP</Table.Th>
               <Table.Th>Checked In</Table.Th>
+              <Table.Th>Hoop</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>{rows}</Table.Tbody>
@@ -370,7 +389,7 @@ export default function GuestList({ data }) {
   );
 }
 
-function GuestDrawerContent({ guest, onDelete, onEmail }) {
+function GuestDrawerContent({ guest, onDelete, onEmail, hoop, hoopLoading, onToggleHoop }) {
   const attendance = guest.attendanceType === 'reception' ? 'Reception' : 'Ceremony';
 
   const getRsvpBadge = () => {
@@ -409,6 +428,25 @@ function GuestDrawerContent({ guest, onDelete, onEmail }) {
         <Badge color={guest.hasCheckedIn ? 'green' : 'gray'} size="lg" ff="text">
           {guest.hasCheckedIn ? 'Yes' : 'No'}
         </Badge>
+      </Group>
+
+      <Group justify="space-between">
+        <Text size="md" c="var(--custom-theme-text)" ff="text" fw={500}>Hoop</Text>
+        <Group gap="sm">
+          <Badge color={hoop ? 'green' : 'gray'} size="lg" ff="text">
+            {hoop ? 'Yes' : 'No'}
+          </Badge>
+          <Button
+            size="xs"
+            variant="outline"
+            color={hoop ? 'red' : 'green'}
+            onClick={onToggleHoop}
+            loading={hoopLoading}
+            ff="text"
+          >
+            {hoop ? 'Remove' : 'Add'}
+          </Button>
+        </Group>
       </Group>
 
       <Divider label="Contact" labelPosition="left" styles={dividerStyles} />
