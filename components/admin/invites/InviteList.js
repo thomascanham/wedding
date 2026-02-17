@@ -217,6 +217,7 @@ export default function InviteList({ data, allGuests }) {
                 { label: 'Ceremony', value: 'ceremony' },
                 { label: 'Reception', value: 'reception' },
               ]}
+              comboboxProps={{ zIndex: 1000 }}
               styles={labelStyles}
             />
 
@@ -230,6 +231,7 @@ export default function InviteList({ data, allGuests }) {
               onChange={setSelectedGuests}
               searchable
               clearable
+              comboboxProps={{ zIndex: 1000 }}
               styles={labelStyles}
             />
 

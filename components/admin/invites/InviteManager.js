@@ -210,6 +210,7 @@ export default function InviteManager({ invitesData, guestsData }) {
               { label: 'Ceremony', value: 'ceremony' },
               { label: 'Reception', value: 'reception' },
             ]}
+            comboboxProps={{ zIndex: 1000 }}
             styles={labelStyles}
           />
 
@@ -223,6 +224,7 @@ export default function InviteManager({ invitesData, guestsData }) {
             onChange={setSelectedGuests}
             searchable
             clearable
+            comboboxProps={{ zIndex: 1000 }}
             styles={labelStyles}
           />
 
@@ -293,6 +295,7 @@ export default function InviteManager({ invitesData, guestsData }) {
                     { label: 'Reception', value: 'reception' },
                   ]}
                   size="sm"
+                  comboboxProps={{ zIndex: 1000 }}
                   styles={labelStyles}
                 />
                 {newGuestError && (

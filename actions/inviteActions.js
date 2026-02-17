@@ -20,7 +20,16 @@ export async function fetchAllInvites() {
       sort: 'name',
       expand: 'guest',
     });
-    const plainRecords = records.map((record) => JSON.parse(JSON.stringify(record)));
+    const plainRecords = records.map((record) => {
+      const plain = { ...record };
+      if (record.expand?.guest) {
+        plain.expand = {
+          ...record.expand,
+          guest: record.expand.guest.map((g) => ({ ...g })),
+        };
+      }
+      return plain;
+    });
     return {
       data: plainRecords,
       total: plainRecords.length,
@@ -44,7 +53,7 @@ export async function createInvite(name, guestIds = [], attendance = 'ceremony')
       sent: false,
     });
     return {
-      data: record,
+      data: { ...record },
       error: false,
     }
   } catch (error) {
@@ -59,7 +68,7 @@ export async function updateInvite(id, data) {
   try {
     const record = await database.collection('invites').update(id, data);
     return {
-      data: record,
+      data: { ...record },
       error: false,
     }
   } catch (error) {
@@ -91,7 +100,7 @@ export async function addGuestToInvite(inviteId, guestIds) {
       guest: guestIds,
     });
     return {
-      data: record,
+      data: { ...record },
       error: false,
     }
   } catch (error) {
@@ -108,7 +117,7 @@ export async function deleteQRCode(inviteId) {
       qr_svg: null,
     });
     return {
-      data: record,
+      data: { ...record },
       error: false,
     }
   } catch (error) {
@@ -129,7 +138,7 @@ export async function generateQRCode(inviteId, baseUrl) {
     });
 
     return {
-      data: record,
+      data: { ...record },
       error: false,
     }
   } catch (error) {

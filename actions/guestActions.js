@@ -9,7 +9,7 @@ export async function fetchAllGuests() {
     const records = await database.collection('guests').getFullList({
       sort: 'surname'
     });
-    const plainRecords = records.map((record) => JSON.parse(JSON.stringify(record)));
+    const plainRecords = records.map((record) => ({ ...record }));
     return {
       data: plainRecords,
       total: plainRecords.length,
@@ -42,7 +42,7 @@ export async function createGuest(firstname, surname, attendanceType) {
       allergies: null,
     });
     return {
-      data: record,
+      data: { ...record },
       error: false,
     }
   } catch (error) {
@@ -59,7 +59,7 @@ export async function toggleGuestHoop(id, currentValue) {
       hoop: !currentValue,
     });
     return {
-      data: record,
+      data: { ...record },
       error: false,
     }
   } catch (error) {

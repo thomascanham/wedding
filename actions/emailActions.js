@@ -20,9 +20,10 @@ export async function fetchGuestsWithEmail() {
       sort: 'surname',
       filter: 'email != null && email != ""',
     });
+    const plainRecords = records.map((record) => ({ ...record }));
     return {
-      data: records,
-      total: records.length,
+      data: plainRecords,
+      total: plainRecords.length,
       error: false,
     }
   } catch (error) {

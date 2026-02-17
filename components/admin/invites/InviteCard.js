@@ -168,6 +168,7 @@ export default function InviteCard({ invite, allGuests }) {
               { label: 'Ceremony', value: 'ceremony' },
               { label: 'Reception', value: 'reception' },
             ]}
+            comboboxProps={{ zIndex: 1000 }}
             styles={{
               label: {
                 color: 'var(--custom-theme-text)',
@@ -197,6 +198,7 @@ export default function InviteCard({ invite, allGuests }) {
             onChange={setSelectedGuests}
             searchable
             clearable
+            comboboxProps={{ zIndex: 1000 }}
             styles={{
               label: {
                 color: 'var(--custom-theme-text)',
