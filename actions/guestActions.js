@@ -9,9 +9,10 @@ export async function fetchAllGuests() {
     const records = await database.collection('guests').getFullList({
       sort: 'surname'
     });
+    const plainRecords = records.map((record) => JSON.parse(JSON.stringify(record)));
     return {
-      data: records,
-      total: records.length,
+      data: plainRecords,
+      total: plainRecords.length,
       error: false,
     }
   } catch (error) {

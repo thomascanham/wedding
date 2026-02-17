@@ -20,9 +20,10 @@ export async function fetchAllInvites() {
       sort: 'name',
       expand: 'guest',
     });
+    const plainRecords = records.map((record) => JSON.parse(JSON.stringify(record)));
     return {
-      data: records,
-      total: records.length,
+      data: plainRecords,
+      total: plainRecords.length,
       error: false,
     }
   } catch (error) {

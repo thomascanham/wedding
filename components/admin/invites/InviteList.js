@@ -33,10 +33,12 @@ export default function InviteList({ data, allGuests }) {
     return nameA.localeCompare(nameB);
   });
 
-  const guestOptions = allGuests.map((guest) => ({
-    value: guest.id,
-    label: guest.name,
-  }));
+  const guestOptions = allGuests
+    .filter((guest) => guest.id && guest.name)
+    .map((guest) => ({
+      value: guest.id,
+      label: guest.name,
+    }));
 
   const handleRowClick = (invite) => {
     setSelectedInvite(invite);

@@ -58,10 +58,12 @@ export default function InviteManager({ invitesData, guestsData }) {
 
   // Combine existing guests with newly created ones for the dropdown
   const allAvailableGuests = [...(guests || []), ...newlyCreatedGuests];
-  const guestOptions = allAvailableGuests.map((guest) => ({
-    value: guest.id,
-    label: guest.name,
-  }));
+  const guestOptions = allAvailableGuests
+    .filter((guest) => guest.id && guest.name)
+    .map((guest) => ({
+      value: guest.id,
+      label: guest.name,
+    }));
 
   const handleCreateGuest = async () => {
     if (!newGuestFirstname.trim() || !newGuestSurname.trim()) {

@@ -39,10 +39,12 @@ export default function InviteCard({ invite, allGuests }) {
   const expandedGuests = invite.expand?.guest || [];
   const guestCount = expandedGuests.length;
 
-  const guestOptions = allGuests.map((guest) => ({
-    value: guest.id,
-    label: guest.name,
-  }));
+  const guestOptions = allGuests
+    .filter((guest) => guest.id && guest.name)
+    .map((guest) => ({
+      value: guest.id,
+      label: guest.name,
+    }));
 
   const handleToggleSent = async () => {
     setLoading(true);
