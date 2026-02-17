@@ -1,8 +1,9 @@
 'use server';
-import { getPocketbase } from "@/database";
+import { db } from "@/database";
+import { invites, inviteGuests, guests } from "@/db/schema";
+import { eq, inArray } from "drizzle-orm";
 import QRCode from 'qrcode';
-
-const database = await getPocketbase();
+import crypto from "crypto";
 
 const QR_OPTIONS = {
   type: 'svg',
@@ -14,25 +15,43 @@ const QR_OPTIONS = {
   width: 256,
 };
 
+function enrichInvitesWithGuests(inviteRows) {
+  if (inviteRows.length === 0) return [];
+
+  const inviteIds = inviteRows.map((i) => i.id);
+  const joinRows = db.select().from(inviteGuests).where(inArray(inviteGuests.invite_id, inviteIds)).all();
+
+  const guestIdsByInvite = {};
+  for (const row of joinRows) {
+    if (!guestIdsByInvite[row.invite_id]) guestIdsByInvite[row.invite_id] = [];
+    guestIdsByInvite[row.invite_id].push(row.guest_id);
+  }
+
+  const allGuestIds = [...new Set(joinRows.map((r) => r.guest_id))];
+  const guestRows = allGuestIds.length > 0
+    ? db.select().from(guests).where(inArray(guests.id, allGuestIds)).all()
+    : [];
+  const guestMap = Object.fromEntries(guestRows.map((g) => [g.id, g]));
+
+  return inviteRows.map((invite) => {
+    const ids = guestIdsByInvite[invite.id] || [];
+    return {
+      ...invite,
+      guest: ids,
+      expand: {
+        guest: ids.map((gid) => guestMap[gid]).filter(Boolean),
+      },
+    };
+  });
+}
+
 export async function fetchAllInvites() {
   try {
-    const records = await database.collection('invites').getFullList({
-      sort: 'name',
-      expand: 'guest',
-    });
-    const plainRecords = records.map((record) => {
-      const plain = { ...record };
-      if (record.expand?.guest) {
-        plain.expand = {
-          ...record.expand,
-          guest: record.expand.guest.map((g) => ({ ...g })),
-        };
-      }
-      return plain;
-    });
+    const records = db.select().from(invites).orderBy(invites.name).all();
+    const enriched = enrichInvitesWithGuests(records);
     return {
-      data: plainRecords,
-      total: plainRecords.length,
+      data: enriched,
+      total: enriched.length,
       error: false,
     }
   } catch (error) {
@@ -46,14 +65,25 @@ export async function fetchAllInvites() {
 
 export async function createInvite(name, guestIds = [], attendance = 'ceremony') {
   try {
-    const record = await database.collection('invites').create({
+    const now = new Date().toISOString();
+    const inviteId = crypto.randomUUID();
+    const record = db.insert(invites).values({
+      id: inviteId,
       name,
-      guest: guestIds,
       attendance,
       sent: false,
-    });
+      created: now,
+      updated: now,
+    }).returning().get();
+
+    if (guestIds.length > 0) {
+      db.insert(inviteGuests).values(
+        guestIds.map((gid) => ({ invite_id: inviteId, guest_id: gid }))
+      ).run();
+    }
+
     return {
-      data: { ...record },
+      data: record,
       error: false,
     }
   } catch (error) {
@@ -64,11 +94,23 @@ export async function createInvite(name, guestIds = [], attendance = 'ceremony')
   }
 }
 
+const INVITE_COLUMNS = new Set(['name', 'attendance', 'sent', 'qr_svg']);
+
 export async function updateInvite(id, data) {
   try {
-    const record = await database.collection('invites').update(id, data);
+    const filtered = {};
+    for (const key of Object.keys(data)) {
+      if (INVITE_COLUMNS.has(key)) filtered[key] = data[key];
+    }
+    filtered.updated = new Date().toISOString();
+
+    const record = db.update(invites)
+      .set(filtered)
+      .where(eq(invites.id, id))
+      .returning()
+      .get();
     return {
-      data: { ...record },
+      data: record,
       error: false,
     }
   } catch (error) {
@@ -81,7 +123,7 @@ export async function updateInvite(id, data) {
 
 export async function deleteInvite(id) {
   try {
-    await database.collection('invites').delete(id);
+    db.delete(invites).where(eq(invites.id, id)).run();
     return {
       success: true,
       error: false,
@@ -96,11 +138,22 @@ export async function deleteInvite(id) {
 
 export async function addGuestToInvite(inviteId, guestIds) {
   try {
-    const record = await database.collection('invites').update(inviteId, {
-      guest: guestIds,
-    });
+    db.delete(inviteGuests).where(eq(inviteGuests.invite_id, inviteId)).run();
+
+    if (guestIds.length > 0) {
+      db.insert(inviteGuests).values(
+        guestIds.map((gid) => ({ invite_id: inviteId, guest_id: gid }))
+      ).run();
+    }
+
+    db.update(invites)
+      .set({ updated: new Date().toISOString() })
+      .where(eq(invites.id, inviteId))
+      .run();
+
+    const record = db.select().from(invites).where(eq(invites.id, inviteId)).get();
     return {
-      data: { ...record },
+      data: record,
       error: false,
     }
   } catch (error) {
@@ -113,11 +166,13 @@ export async function addGuestToInvite(inviteId, guestIds) {
 
 export async function deleteQRCode(inviteId) {
   try {
-    const record = await database.collection('invites').update(inviteId, {
-      qr_svg: null,
-    });
+    const record = db.update(invites)
+      .set({ qr_svg: null, updated: new Date().toISOString() })
+      .where(eq(invites.id, inviteId))
+      .returning()
+      .get();
     return {
-      data: { ...record },
+      data: record,
       error: false,
     }
   } catch (error) {
@@ -133,12 +188,14 @@ export async function generateQRCode(inviteId, baseUrl) {
     const inviteUrl = `${baseUrl}/invite/${inviteId}`;
     const svgString = await QRCode.toString(inviteUrl, QR_OPTIONS);
 
-    const record = await database.collection('invites').update(inviteId, {
-      qr_svg: svgString,
-    });
+    const record = db.update(invites)
+      .set({ qr_svg: svgString, updated: new Date().toISOString() })
+      .where(eq(invites.id, inviteId))
+      .returning()
+      .get();
 
     return {
-      data: { ...record },
+      data: record,
       error: false,
     }
   } catch (error) {
@@ -151,16 +208,17 @@ export async function generateQRCode(inviteId, baseUrl) {
 
 export async function generateAllQRCodes(baseUrl) {
   try {
-    const invites = await database.collection('invites').getFullList();
+    const allInvites = db.select().from(invites).all();
     const results = [];
 
-    for (const invite of invites) {
+    for (const invite of allInvites) {
       const inviteUrl = `${baseUrl}/invite/${invite.id}`;
       const svgString = await QRCode.toString(inviteUrl, QR_OPTIONS);
 
-      await database.collection('invites').update(invite.id, {
-        qr_svg: svgString,
-      });
+      db.update(invites)
+        .set({ qr_svg: svgString, updated: new Date().toISOString() })
+        .where(eq(invites.id, invite.id))
+        .run();
 
       results.push({ id: invite.id, name: invite.name });
     }

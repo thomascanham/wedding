@@ -1,8 +1,8 @@
 'use server';
 import nodemailer from 'nodemailer';
-import { getPocketbase } from "@/database";
-
-const database = await getPocketbase();
+import { db } from "@/database";
+import { guests } from "@/db/schema";
+import { isNotNull, ne, and } from "drizzle-orm";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -16,14 +16,13 @@ const transporter = nodemailer.createTransport({
 
 export async function fetchGuestsWithEmail() {
   try {
-    const records = await database.collection('guests').getFullList({
-      sort: 'surname',
-      filter: 'email != null && email != ""',
-    });
-    const plainRecords = records.map((record) => ({ ...record }));
+    const records = db.select().from(guests)
+      .where(and(isNotNull(guests.email), ne(guests.email, '')))
+      .orderBy(guests.surname)
+      .all();
     return {
-      data: plainRecords,
-      total: plainRecords.length,
+      data: records,
+      total: records.length,
       error: false,
     }
   } catch (error) {
@@ -37,11 +36,11 @@ export async function fetchGuestsWithEmail() {
 
 export async function sendEmailToAllGuests(subject, htmlContent) {
   try {
-    const guests = await database.collection('guests').getFullList({
-      filter: 'email != null && email != ""',
-    });
+    const guestList = db.select().from(guests)
+      .where(and(isNotNull(guests.email), ne(guests.email, '')))
+      .all();
 
-    if (guests.length === 0) {
+    if (guestList.length === 0) {
       return {
         success: false,
         sent: 0,
@@ -52,7 +51,7 @@ export async function sendEmailToAllGuests(subject, htmlContent) {
     const results = [];
     const errors = [];
 
-    for (const guest of guests) {
+    for (const guest of guestList) {
       try {
         await transporter.sendMail({
           from: `"Tom & Sam" <${process.env.SMTP_FROM}>`,

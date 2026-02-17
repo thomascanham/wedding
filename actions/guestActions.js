@@ -1,18 +1,15 @@
 'use server';
-import { getPocketbase } from "@/database";
+import { db } from "@/database";
+import { guests } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import crypto from "crypto";
 
-const database = await getPocketbase();
-
-//fetch all guests in surname alphabetical order
 export async function fetchAllGuests() {
   try {
-    const records = await database.collection('guests').getFullList({
-      sort: 'surname'
-    });
-    const plainRecords = records.map((record) => ({ ...record }));
+    const records = db.select().from(guests).orderBy(guests.surname).all();
     return {
-      data: plainRecords,
-      total: plainRecords.length,
+      data: records,
+      total: records.length,
       error: false,
     }
   } catch (error) {
@@ -26,7 +23,9 @@ export async function fetchAllGuests() {
 
 export async function createGuest(firstname, surname, attendanceType) {
   try {
-    const record = await database.collection('guests').create({
+    const now = new Date().toISOString();
+    const record = db.insert(guests).values({
+      id: crypto.randomUUID(),
       firstname,
       surname,
       name: `${firstname} ${surname}`,
@@ -40,9 +39,11 @@ export async function createGuest(firstname, surname, attendanceType) {
       dessert: null,
       dietry: null,
       allergies: null,
-    });
+      created: now,
+      updated: now,
+    }).returning().get();
     return {
-      data: { ...record },
+      data: record,
       error: false,
     }
   } catch (error) {
@@ -55,11 +56,13 @@ export async function createGuest(firstname, surname, attendanceType) {
 
 export async function toggleGuestHoop(id, currentValue) {
   try {
-    const record = await database.collection('guests').update(id, {
-      hoop: !currentValue,
-    });
+    const record = db.update(guests)
+      .set({ hoop: !currentValue, updated: new Date().toISOString() })
+      .where(eq(guests.id, id))
+      .returning()
+      .get();
     return {
-      data: { ...record },
+      data: record,
       error: false,
     }
   } catch (error) {
@@ -72,7 +75,7 @@ export async function toggleGuestHoop(id, currentValue) {
 
 export async function deleteGuest(id) {
   try {
-    await database.collection('guests').delete(id);
+    db.delete(guests).where(eq(guests.id, id)).run();
     return {
       success: true,
       error: false,
