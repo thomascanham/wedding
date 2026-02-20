@@ -2,6 +2,8 @@ import { Group, Paper, Title } from "@mantine/core";
 import { fetchGuestsWithEmail } from "@/actions/emailActions";
 import CommsManager from "@/components/admin/comms/CommsManager";
 
+export const dynamic = 'force-dynamic';
+
 export default async function CommsPage() {
   const { data: guestsWithEmail } = await fetchGuestsWithEmail();
 

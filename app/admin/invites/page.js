@@ -3,6 +3,8 @@ import { fetchAllInvites } from "@/actions/inviteActions";
 import { fetchAllGuests } from "@/actions/guestActions";
 import InviteManager from "@/components/admin/invites/InviteManager";
 
+export const dynamic = 'force-dynamic';
+
 export default async function InvitesPage() {
   const invitesData = await fetchAllInvites();
   const guestsData = await fetchAllGuests();
