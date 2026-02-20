@@ -1,26 +1,20 @@
 /**
- * One-time migration script: PocketBase → SQLite
+ * One-time migration script: PocketBase → MySQL
  *
  * Usage:
  *   1. Make sure PocketBase is still running and .env has DATABASE_URL etc.
- *   2. Run `npm run db:push` first to create the SQLite tables.
- *   3. Run `node db/seed.js`
+ *   2. Make sure DB_MYSQL is set in .env
+ *   3. Run `npm run db:push` first to create the MySQL tables.
+ *   4. Run `node db/seed.js`
  */
 import 'dotenv/config';
 import PocketBase from 'pocketbase';
-import Database from 'better-sqlite3';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import mysql from 'mysql2/promise';
+import { drizzle } from 'drizzle-orm/mysql2';
 import { guests, invites, inviteGuests } from './schema.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dbPath = path.join(__dirname, 'wedding.db');
-
-const sqlite = new Database(dbPath);
-sqlite.pragma('journal_mode = WAL');
-sqlite.pragma('foreign_keys = ON');
-const db = drizzle(sqlite);
+const pool = mysql.createPool(process.env.DB_MYSQL);
+const db = drizzle(pool);
 
 async function main() {
   const pb = new PocketBase(process.env.DATABASE_URL);
@@ -40,7 +34,7 @@ async function main() {
   console.log(`Found ${pbGuests.length} guests in PocketBase`);
 
   for (const g of pbGuests) {
-    db.insert(guests).values({
+    await db.insert(guests).values({
       id: g.id,
       firstname: g.firstname || null,
       surname: g.surname || null,
@@ -58,16 +52,16 @@ async function main() {
       allergies: g.allergies || null,
       created: g.created || new Date().toISOString(),
       updated: g.updated || new Date().toISOString(),
-    }).run();
+    });
   }
-  console.log(`Inserted ${pbGuests.length} guests into SQLite`);
+  console.log(`Inserted ${pbGuests.length} guests into MySQL`);
 
   // --- Migrate invites ---
   const pbInvites = await pb.collection('invites').getFullList({ sort: 'name' });
   console.log(`Found ${pbInvites.length} invites in PocketBase`);
 
   for (const inv of pbInvites) {
-    db.insert(invites).values({
+    await db.insert(invites).values({
       id: inv.id,
       name: inv.name || null,
       attendance: inv.attendance || null,
@@ -75,27 +69,28 @@ async function main() {
       qr_svg: inv.qr_svg || null,
       created: inv.created || new Date().toISOString(),
       updated: inv.updated || new Date().toISOString(),
-    }).run();
+    });
 
     // Create join table rows from PocketBase relation array
     const guestIds = inv.guest || [];
     for (const gid of guestIds) {
-      db.insert(inviteGuests).values({
+      await db.insert(inviteGuests).values({
         invite_id: inv.id,
         guest_id: gid,
-      }).run();
+      });
     }
   }
-  console.log(`Inserted ${pbInvites.length} invites into SQLite`);
+  console.log(`Inserted ${pbInvites.length} invites into MySQL`);
 
-  const joinCount = db.select().from(inviteGuests).all().length;
-  console.log(`Created ${joinCount} invite-guest relationships`);
+  const joinRows = await db.select().from(inviteGuests);
+  console.log(`Created ${joinRows.length} invite-guest relationships`);
 
   console.log('\nMigration complete!');
-  sqlite.close();
+  await pool.end();
 }
 
-main().catch((err) => {
+main().catch(async (err) => {
   console.error('Migration failed:', err);
+  await pool.end();
   process.exit(1);
 });

@@ -16,10 +16,9 @@ const transporter = nodemailer.createTransport({
 
 export async function fetchGuestsWithEmail() {
   try {
-    const records = db.select().from(guests)
+    const records = await db.select().from(guests)
       .where(and(isNotNull(guests.email), ne(guests.email, '')))
-      .orderBy(guests.surname)
-      .all();
+      .orderBy(guests.surname);
     return {
       data: records,
       total: records.length,
@@ -36,9 +35,8 @@ export async function fetchGuestsWithEmail() {
 
 export async function sendEmailToAllGuests(subject, htmlContent) {
   try {
-    const guestList = db.select().from(guests)
-      .where(and(isNotNull(guests.email), ne(guests.email, '')))
-      .all();
+    const guestList = await db.select().from(guests)
+      .where(and(isNotNull(guests.email), ne(guests.email, '')));
 
     if (guestList.length === 0) {
       return {

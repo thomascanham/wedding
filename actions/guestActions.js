@@ -6,7 +6,7 @@ import crypto from "crypto";
 
 export async function fetchAllGuests() {
   try {
-    const records = db.select().from(guests).orderBy(guests.surname).all();
+    const records = await db.select().from(guests).orderBy(guests.surname);
     return {
       data: records,
       total: records.length,
@@ -24,8 +24,9 @@ export async function fetchAllGuests() {
 export async function createGuest(firstname, surname, attendanceType) {
   try {
     const now = new Date().toISOString();
-    const record = db.insert(guests).values({
-      id: crypto.randomUUID(),
+    const id = crypto.randomUUID();
+    await db.insert(guests).values({
+      id,
       firstname,
       surname,
       name: `${firstname} ${surname}`,
@@ -41,7 +42,8 @@ export async function createGuest(firstname, surname, attendanceType) {
       allergies: null,
       created: now,
       updated: now,
-    }).returning().get();
+    });
+    const [record] = await db.select().from(guests).where(eq(guests.id, id));
     return {
       data: record,
       error: false,
@@ -56,11 +58,10 @@ export async function createGuest(firstname, surname, attendanceType) {
 
 export async function toggleGuestHoop(id, currentValue) {
   try {
-    const record = db.update(guests)
+    await db.update(guests)
       .set({ hoop: !currentValue, updated: new Date().toISOString() })
-      .where(eq(guests.id, id))
-      .returning()
-      .get();
+      .where(eq(guests.id, id));
+    const [record] = await db.select().from(guests).where(eq(guests.id, id));
     return {
       data: record,
       error: false,
@@ -75,7 +76,7 @@ export async function toggleGuestHoop(id, currentValue) {
 
 export async function deleteGuest(id) {
   try {
-    db.delete(guests).where(eq(guests.id, id)).run();
+    await db.delete(guests).where(eq(guests.id, id));
     return {
       success: true,
       error: false,

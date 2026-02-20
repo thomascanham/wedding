@@ -1,8 +1,6 @@
 import PocketBase from "pocketbase";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import Database from "better-sqlite3";
-import path from "path";
-import { fileURLToPath } from "url";
+import { drizzle } from "drizzle-orm/mysql2";
+import mysql from "mysql2/promise";
 
 // --- PocketBase (auth only) ---
 let superUserClient = null;
@@ -26,12 +24,7 @@ export async function getPocketbase() {
   return superUserClient;
 }
 
-// --- SQLite + Drizzle ---
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dbPath = path.join(__dirname, "db", "wedding.db");
+// --- MySQL + Drizzle ---
+const pool = mysql.createPool(process.env.DB_MYSQL);
 
-const sqlite = new Database(dbPath);
-sqlite.pragma("journal_mode = WAL");
-sqlite.pragma("foreign_keys = ON");
-
-export const db = drizzle(sqlite);
+export const db = drizzle(pool);

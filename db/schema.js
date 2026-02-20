@@ -1,37 +1,37 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { mysqlTable, varchar, text, boolean, timestamp } from 'drizzle-orm/mysql-core';
 import crypto from 'crypto';
 
-export const guests = sqliteTable('guests', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  firstname: text('firstname'),
-  surname: text('surname'),
-  name: text('name'),
-  attendanceType: text('attendanceType'),
-  rsvpStatus: text('rsvpStatus'),
-  hasCheckedIn: integer('hasCheckedIn', { mode: 'boolean' }).default(false),
-  hoop: integer('hoop', { mode: 'boolean' }).default(false),
-  phone: text('phone'),
-  email: text('email'),
-  starter: text('starter'),
-  main: text('main'),
-  dessert: text('dessert'),
+export const guests = mysqlTable('guests', {
+  id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+  firstname: varchar('firstname', { length: 255 }),
+  surname: varchar('surname', { length: 255 }),
+  name: varchar('name', { length: 255 }),
+  attendanceType: varchar('attendanceType', { length: 255 }),
+  rsvpStatus: varchar('rsvpStatus', { length: 255 }),
+  hasCheckedIn: boolean('hasCheckedIn').default(false),
+  hoop: boolean('hoop').default(false),
+  phone: varchar('phone', { length: 255 }),
+  email: varchar('email', { length: 255 }),
+  starter: varchar('starter', { length: 255 }),
+  main: varchar('main', { length: 255 }),
+  dessert: varchar('dessert', { length: 255 }),
   dietry: text('dietry'),
   allergies: text('allergies'),
-  created: text('created').$defaultFn(() => new Date().toISOString()),
-  updated: text('updated').$defaultFn(() => new Date().toISOString()),
+  created: varchar('created', { length: 255 }).$defaultFn(() => new Date().toISOString()),
+  updated: varchar('updated', { length: 255 }).$defaultFn(() => new Date().toISOString()),
 });
 
-export const invites = sqliteTable('invites', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  name: text('name'),
-  attendance: text('attendance'),
-  sent: integer('sent', { mode: 'boolean' }).default(false),
+export const invites = mysqlTable('invites', {
+  id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: varchar('name', { length: 255 }),
+  attendance: varchar('attendance', { length: 255 }),
+  sent: boolean('sent').default(false),
   qr_svg: text('qr_svg'),
-  created: text('created').$defaultFn(() => new Date().toISOString()),
-  updated: text('updated').$defaultFn(() => new Date().toISOString()),
+  created: varchar('created', { length: 255 }).$defaultFn(() => new Date().toISOString()),
+  updated: varchar('updated', { length: 255 }).$defaultFn(() => new Date().toISOString()),
 });
 
-export const inviteGuests = sqliteTable('invite_guests', {
-  invite_id: text('invite_id').notNull().references(() => invites.id, { onDelete: 'cascade' }),
-  guest_id: text('guest_id').notNull().references(() => guests.id, { onDelete: 'cascade' }),
+export const inviteGuests = mysqlTable('invite_guests', {
+  invite_id: varchar('invite_id', { length: 36 }).notNull().references(() => invites.id, { onDelete: 'cascade' }),
+  guest_id: varchar('guest_id', { length: 36 }).notNull().references(() => guests.id, { onDelete: 'cascade' }),
 });

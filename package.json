@@ -22,9 +22,9 @@
     "@tiptap/pm": "^3.19.0",
     "@tiptap/react": "^3.19.0",
     "@tiptap/starter-kit": "^3.19.0",
-    "better-sqlite3": "^12.6.2",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
+    "mysql2": "^3.17.4",
     "next": "16.0.7",
     "nodemailer": "^8.0.0",
     "pocketbase": "^0.26.5",
@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "babel-plugin-react-compiler": "1.0.0",
+    "baseline-browser-mapping": "^2.9.19",
     "drizzle-kit": "^0.31.9",
     "eslint": "^9",
     "eslint-config-next": "16.0.7",
