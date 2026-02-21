@@ -25,7 +25,7 @@ import { IconMail, IconMailOff, IconTrash, IconUsers, IconQrcode } from '@tabler
 import { updateInvite, deleteInvite, addGuestToInvite, generateQRCode, deleteQRCode } from '@/actions/inviteActions';
 import getGuestInitials from '@/lib/getGuestInitials';
 
-export default function InviteCard({ invite, allGuests }) {
+export default function InviteCard({ invite, allGuests, allInvites = [] }) {
   const router = useRouter();
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
@@ -39,8 +39,15 @@ export default function InviteCard({ invite, allGuests }) {
   const expandedGuests = invite.expand?.guest || [];
   const guestCount = expandedGuests.length;
 
+  // Guests assigned to other invites (not this one)
+  const otherAssignedIds = new Set(
+    allInvites
+      .filter((inv) => inv.id !== invite.id)
+      .flatMap((inv) => inv.guest || [])
+  );
+
   const guestOptions = allGuests
-    .filter((guest) => guest.id && guest.name)
+    .filter((guest) => guest.id && guest.name && !otherAssignedIds.has(guest.id))
     .map((guest) => ({
       value: guest.id,
       label: guest.name,

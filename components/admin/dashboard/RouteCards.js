@@ -20,15 +20,25 @@ const data = [
     countLabel: 'invites'
   },
   {
+    title: 'Manage Seating',
+    description: 'Manage seating for the wedding breakfast',
+    icon: IconHotelService,
+    link: '/admin/seating',
+    countKey: 'seatingCount',
+    countLabel: 'seating'
+  },
+  {
     title: 'Manage Rooms',
     description: 'Manage hotel room blocks for guests.',
     icon: IconHotelService,
-    link: '/admin/rooms'
+    link: '/admin/rooms',
+    countKey: 'roomCount',
+    countLabel: 'rooms'
   },
 ]
 
-export default function RouteCards({ guestCount, inviteCount }) {
-  const counts = { guestCount, inviteCount };
+export default function RouteCards({ guestCount, inviteCount, roomCount }) {
+  const counts = { guestCount, inviteCount, roomCount };
 
   return (
     <SimpleGrid

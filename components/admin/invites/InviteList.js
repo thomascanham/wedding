@@ -6,7 +6,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconUsers, IconTrash, IconMail, IconMailOff, IconQrcode } from '@tabler/icons-react';
 import { updateInvite, deleteInvite, addGuestToInvite, generateQRCode, deleteQRCode } from '@/actions/inviteActions';
 
-export default function InviteList({ data, allGuests }) {
+export default function InviteList({ data, allGuests, allInvites = [] }) {
   const router = useRouter();
   const { data: invites, error } = data;
   const [selectedInvite, setSelectedInvite] = useState(null);
@@ -33,8 +33,15 @@ export default function InviteList({ data, allGuests }) {
     return nameA.localeCompare(nameB);
   });
 
+  // Guests assigned to other invites (not the selected one)
+  const otherAssignedIds = new Set(
+    allInvites
+      .filter((inv) => inv.id !== selectedInvite?.id)
+      .flatMap((inv) => inv.guest || [])
+  );
+
   const guestOptions = allGuests
-    .filter((guest) => guest.id && guest.name)
+    .filter((guest) => guest.id && guest.name && !otherAssignedIds.has(guest.id))
     .map((guest) => ({
       value: guest.id,
       label: guest.name,

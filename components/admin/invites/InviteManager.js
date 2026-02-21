@@ -56,10 +56,13 @@ export default function InviteManager({ invitesData, guestsData }) {
   const { data: invites = [], error: invitesError } = invitesData || {};
   const { data: guests = [] } = guestsData || {};
 
+  // Build set of guest IDs already assigned to any invite
+  const assignedGuestIds = new Set(invites.flatMap((inv) => inv.guest || []));
+
   // Combine existing guests with newly created ones for the dropdown
   const allAvailableGuests = [...(guests || []), ...newlyCreatedGuests];
   const guestOptions = allAvailableGuests
-    .filter((guest) => guest.id && guest.name)
+    .filter((guest) => guest.id && guest.name && !assignedGuestIds.has(guest.id))
     .map((guest) => ({
       value: guest.id,
       label: guest.name,
@@ -399,11 +402,11 @@ export default function InviteManager({ invitesData, guestsData }) {
           verticalSpacing={{ base: 'md', sm: 'xl' }}
         >
           {invites.map((invite) => (
-            <InviteCard key={invite.id} invite={invite} allGuests={allAvailableGuests} />
+            <InviteCard key={invite.id} invite={invite} allGuests={allAvailableGuests} allInvites={invites} />
           ))}
         </SimpleGrid>
       ) : (
-        <InviteList data={invitesData} allGuests={allAvailableGuests} />
+        <InviteList data={invitesData} allGuests={allAvailableGuests} allInvites={invites} />
       )}
     </>
   );

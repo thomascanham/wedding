@@ -1,4 +1,4 @@
-import { mysqlTable, varchar, text, boolean, timestamp } from 'drizzle-orm/mysql-core';
+import { mysqlTable, varchar, text, boolean, timestamp, int } from 'drizzle-orm/mysql-core';
 import crypto from 'crypto';
 
 export const guests = mysqlTable('guests', {
@@ -33,5 +33,20 @@ export const invites = mysqlTable('invites', {
 
 export const inviteGuests = mysqlTable('invite_guests', {
   invite_id: varchar('invite_id', { length: 36 }).notNull().references(() => invites.id, { onDelete: 'cascade' }),
+  guest_id: varchar('guest_id', { length: 36 }).notNull().references(() => guests.id, { onDelete: 'cascade' }),
+});
+
+export const rooms = mysqlTable('rooms', {
+  id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: varchar('name', { length: 255 }),
+  description: text('description'),
+  block: varchar('block', { length: 255 }),
+  capacity: int('capacity'),
+  created: varchar('created', { length: 255 }).$defaultFn(() => new Date().toISOString()),
+  updated: varchar('updated', { length: 255 }).$defaultFn(() => new Date().toISOString()),
+});
+
+export const roomGuests = mysqlTable('room_guests', {
+  room_id: varchar('room_id', { length: 36 }).notNull().references(() => rooms.id, { onDelete: 'cascade' }),
   guest_id: varchar('guest_id', { length: 36 }).notNull().references(() => guests.id, { onDelete: 'cascade' }),
 });

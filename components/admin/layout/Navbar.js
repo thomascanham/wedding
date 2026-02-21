@@ -11,6 +11,7 @@ const navLinks = [
   { label: 'Dashboard', href: '/admin' },
   { label: 'Guests', href: '/admin/guests' },
   { label: 'Invites', href: '/admin/invites' },
+  { label: 'Seating', href: '/admin/seating', disabled: true },
   { label: 'Rooms', href: '/admin/rooms' },
   { label: 'Comms', href: '/admin/comms' },
 ];
@@ -42,9 +43,11 @@ export default function Navbar() {
                   mx="lg"
                   fw={700}
                   underline='never'
-                  component={Link}
-                  href={link.href}
+                  component={link.disabled ? 'span' : Link}
+                  href={link.disabled ? undefined : link.href}
                   className={isActive(link.href) ? classes.activeLink : ''}
+                  c={link.disabled ? 'dimmed' : undefined}
+                  style={link.disabled ? { cursor: 'not-allowed', opacity: 0.5 } : undefined}
                 >
                   {link.label}
                 </Anchor>
@@ -102,11 +105,12 @@ export default function Navbar() {
               fz="lg"
               fw={600}
               underline='never'
-              component={Link}
-              href={link.href}
-              onClick={close}
-              c={isActive(link.href) ? 'var(--custom-theme-heading)' : 'var(--custom-theme-text)'}
+              component={link.disabled ? 'span' : Link}
+              href={link.disabled ? undefined : link.href}
+              onClick={link.disabled ? undefined : close}
+              c={link.disabled ? 'dimmed' : isActive(link.href) ? 'var(--custom-theme-heading)' : 'var(--custom-theme-text)'}
               className={isActive(link.href) ? classes.activeMobileLink : ''}
+              style={link.disabled ? { cursor: 'not-allowed', opacity: 0.5 } : undefined}
             >
               {link.label}
             </Anchor>
