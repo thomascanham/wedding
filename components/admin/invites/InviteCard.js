@@ -8,14 +8,13 @@ import {
   Badge,
   Button,
   Stack,
-  Avatar,
   ActionIcon,
   Drawer,
   MultiSelect,
   Select,
   Divider,
-  Tooltip,
   Modal,
+  Tooltip,
   TextInput,
   Box,
   Center,
@@ -23,7 +22,7 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { IconMail, IconMailOff, IconTrash, IconUsers, IconQrcode } from '@tabler/icons-react';
 import { updateInvite, deleteInvite, addGuestToInvite, generateQRCode, deleteQRCode } from '@/actions/inviteActions';
-import getGuestInitials from '@/lib/getGuestInitials';
+
 
 export default function InviteCard({ invite, allGuests, allInvites = [] }) {
   const router = useRouter();
@@ -318,7 +317,8 @@ export default function InviteCard({ invite, allGuests, allInvites = [] }) {
         withBorder
         p="lg"
         bg="white"
-        style={{ border: '2px solid var(--custom-theme-heading)' }}
+        h="100%"
+        style={{ border: '2px solid var(--custom-theme-heading)', display: 'flex', flexDirection: 'column' }}
       >
         <Group justify="space-between" mb="md">
           <Text fz="lg" fw={500} ff="heading" c="var(--custom-theme-heading)">
@@ -342,28 +342,22 @@ export default function InviteCard({ invite, allGuests, allInvites = [] }) {
         </Group>
 
         {expandedGuests.length > 0 && (
-          <Stack gap="xs" mb="md">
-            {expandedGuests.slice(0, 3).map((guest) => (
-              <Group key={guest.id} gap="xs">
-                <Avatar
-                  size={24}
-                  radius={24}
-                  color="var(--custom-theme-text)"
-                  variant="outline"
-                >
-                  {getGuestInitials(guest.firstname, guest.surname)}
-                </Avatar>
-                <Text size="sm" c="var(--custom-theme-text)" ff="text">
-                  {guest.name}
-                </Text>
-              </Group>
-            ))}
-            {expandedGuests.length > 3 && (
-              <Text size="xs" c="dimmed" ff="text" fs="italic">
-                +{expandedGuests.length - 3} more
-              </Text>
-            )}
-          </Stack>
+          <Tooltip
+            label={expandedGuests.map((g) => g.name).join(', ')}
+            multiline
+            maw={300}
+            withArrow
+          >
+            <Text
+              size="sm"
+              c="var(--custom-theme-text)"
+              ff="text"
+              mb="md"
+              truncate
+            >
+              {expandedGuests.map((g) => g.name).join(', ')}
+            </Text>
+          </Tooltip>
         )}
 
         <Button
@@ -372,6 +366,7 @@ export default function InviteCard({ invite, allGuests, allInvites = [] }) {
           color="var(--custom-theme-heading)"
           variant="outline"
           ff="text"
+          mt="auto"
         >
           Manage Invite
         </Button>

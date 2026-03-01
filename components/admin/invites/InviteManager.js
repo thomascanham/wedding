@@ -18,6 +18,7 @@ import {
   ActionIcon,
   Badge,
   Tooltip,
+  SegmentedControl,
 } from '@mantine/core';
 import { useDisclosure, useLocalStorage } from '@mantine/hooks';
 import { IconPlus, IconX, IconLayoutGrid, IconList, IconQrcode } from '@tabler/icons-react';
@@ -41,6 +42,7 @@ export default function InviteManager({ invitesData, guestsData }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [qrAllLoading, setQrAllLoading] = useState(false);
+  const [attendanceFilter, setAttendanceFilter] = useState('all');
 
   // Inline guest creation state
   const [showNewGuestForm, setShowNewGuestForm] = useState(false);
@@ -67,6 +69,10 @@ export default function InviteManager({ invitesData, guestsData }) {
       value: guest.id,
       label: guest.name,
     }));
+
+  const filteredInvites = attendanceFilter === 'all'
+    ? invites
+    : invites.filter((inv) => inv.attendance === attendanceFilter);
 
   const handleCreateGuest = async () => {
     if (!newGuestFirstname.trim() || !newGuestSurname.trim()) {
@@ -346,30 +352,46 @@ export default function InviteManager({ invitesData, guestsData }) {
         </Stack>
       </Drawer>
 
-      <Group justify="space-between" mb="lg">
-        <Group gap="xs">
-          <Tooltip label="Grid view">
-            <ActionIcon
-              variant={viewType === 'grid' ? 'filled' : 'outline'}
+      <Group gap="xl" wrap="wrap" justify="space-between" align="flex-end" mb="lg">
+        <Group gap="xl" wrap="wrap" align="flex-end">
+          <Box>
+            <Text size="sm" fw={500} mb={4} c="var(--custom-theme-text)">Attendance</Text>
+            <SegmentedControl
+              value={attendanceFilter}
+              onChange={setAttendanceFilter}
+              data={[
+                { label: 'All', value: 'all' },
+                { label: 'Ceremony', value: 'ceremony' },
+                { label: 'Reception', value: 'reception' },
+              ]}
               color="var(--custom-theme-heading)"
-              size="lg"
-              onClick={() => setViewType('grid')}
-              aria-label="Grid view"
-            >
-              <IconLayoutGrid size={20} />
-            </ActionIcon>
-          </Tooltip>
-          <Tooltip label="List view">
-            <ActionIcon
-              variant={viewType === 'list' ? 'filled' : 'outline'}
-              color="var(--custom-theme-heading)"
-              size="lg"
-              onClick={() => setViewType('list')}
-              aria-label="List view"
-            >
-              <IconList size={20} />
-            </ActionIcon>
-          </Tooltip>
+              styles={{ root: { backgroundColor: 'var(--custom-theme-fill)' } }}
+            />
+          </Box>
+          <Group gap="xs">
+            <Tooltip label="Grid view">
+              <ActionIcon
+                variant={viewType === 'grid' ? 'filled' : 'outline'}
+                color="var(--custom-theme-heading)"
+                size="lg"
+                onClick={() => setViewType('grid')}
+                aria-label="Grid view"
+              >
+                <IconLayoutGrid size={20} />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label="List view">
+              <ActionIcon
+                variant={viewType === 'list' ? 'filled' : 'outline'}
+                color="var(--custom-theme-heading)"
+                size="lg"
+                onClick={() => setViewType('list')}
+                aria-label="List view"
+              >
+                <IconList size={20} />
+              </ActionIcon>
+            </Tooltip>
+          </Group>
         </Group>
         <Group gap="sm">
           <Button
@@ -395,18 +417,22 @@ export default function InviteManager({ invitesData, guestsData }) {
         <Alert color="gray" variant="light">
           No invites yet. Create your first invite to get started.
         </Alert>
+      ) : filteredInvites.length === 0 ? (
+        <Alert color="gray" variant="light">
+          No {attendanceFilter} invites found.
+        </Alert>
       ) : viewType === 'grid' ? (
         <SimpleGrid
           cols={{ base: 1, sm: 2, lg: 3 }}
           spacing={{ base: 10, sm: 'xl' }}
           verticalSpacing={{ base: 'md', sm: 'xl' }}
         >
-          {invites.map((invite) => (
+          {filteredInvites.map((invite) => (
             <InviteCard key={invite.id} invite={invite} allGuests={allAvailableGuests} allInvites={invites} />
           ))}
         </SimpleGrid>
       ) : (
-        <InviteList data={invitesData} allGuests={allAvailableGuests} allInvites={invites} />
+        <InviteList data={{ ...invitesData, data: filteredInvites }} allGuests={allAvailableGuests} allInvites={invites} />
       )}
     </>
   );
