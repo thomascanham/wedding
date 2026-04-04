@@ -3,6 +3,7 @@ import { db } from "@/database";
 import { guests } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import crypto from "crypto";
+import { sendRsvpNotification } from "@/actions/emailActions";
 
 export async function fetchAllGuests() {
   try {
@@ -62,6 +63,55 @@ export async function toggleGuestHoop(id, currentValue) {
       .set({ hoop: !currentValue, updated: new Date().toISOString() })
       .where(eq(guests.id, id));
     const [record] = await db.select().from(guests).where(eq(guests.id, id));
+    return {
+      data: record,
+      error: false,
+    }
+  } catch (error) {
+    return {
+      data: null,
+      error: { message: error.message },
+    }
+  }
+}
+
+export async function fetchGuestById(id) {
+  try {
+    const [record] = await db.select().from(guests).where(eq(guests.id, id));
+    return {
+      data: record || null,
+      error: false,
+    }
+  } catch (error) {
+    return {
+      data: null,
+      error: { message: error.message },
+    }
+  }
+}
+
+export async function submitGuestRsvp(id, { attending, dessert, dietry, allergies, songRequest, email }) {
+  try {
+    const now = new Date().toISOString();
+    const fields = {
+      rsvpStatus: attending ? 'attending' : 'declined',
+      hasCheckedIn: true,
+      updated: now,
+    };
+
+    if (attending) {
+      fields.starter = 'Antipasto board';
+      fields.main = 'Spanish Style Tapas';
+      fields.dessert = dessert || null;
+      fields.dietry = dietry || null;
+      fields.allergies = allergies || null;
+      fields.songRequest = songRequest || null;
+      fields.email = email || null;
+    }
+
+    await db.update(guests).set(fields).where(eq(guests.id, id));
+    const [record] = await db.select().from(guests).where(eq(guests.id, id));
+    await sendRsvpNotification(record);
     return {
       data: record,
       error: false,

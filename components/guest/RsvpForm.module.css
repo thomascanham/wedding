@@ -1,0 +1,319 @@
+/* ── Page shell ─────────────────────────────────────────────── */
+.page {
+  min-height: 100vh;
+  background-color: #f5efe6;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem 4rem;
+}
+
+/* ── Card ───────────────────────────────────────────────────── */
+.card {
+  width: 100%;
+  max-width: 500px;
+  background: #fdf8f0;
+  border: 1px solid #d9c9b0;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(60, 35, 15, 0.1);
+}
+
+/* ── Card header ────────────────────────────────────────────── */
+.cardHeader {
+  background: linear-gradient(160deg, #49080c 0%, #721f14 100%);
+  padding: 2rem 2rem 1.75rem;
+  text-align: center;
+}
+
+.eyebrow {
+  font-family: "Raleway", sans-serif;
+  font-weight: 300;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(232, 220, 200, 0.8);
+  margin-bottom: 0.4rem;
+}
+
+.title {
+  font-family: "Playfair Display", serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #f5efe6;
+  margin-bottom: 0.5rem;
+}
+
+.guestName {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: rgba(232, 220, 200, 0.9);
+}
+
+/* ── Progress bar ───────────────────────────────────────────── */
+.progressBar {
+  height: 4px;
+  background: #e8d8c0;
+}
+
+.progressFill {
+  height: 100%;
+  background: #721f14;
+  transition: width 0.4s ease;
+}
+
+/* ── Body ───────────────────────────────────────────────────── */
+.body {
+  padding: 2rem;
+}
+
+/* ── Steps ──────────────────────────────────────────────────── */
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.stepTitle {
+  font-family: "Playfair Display", serif;
+  font-size: 1.5rem;
+  color: #49080c;
+}
+
+.stepText {
+  font-family: "Raleway", sans-serif;
+  font-size: 0.9rem;
+  color: #7a6248;
+  line-height: 1.65;
+}
+
+/* ── Step 1 buttons ─────────────────────────────────────────── */
+.choiceRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.choiceBtn {
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-family: "Raleway", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.choiceBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.choiceBtn:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.choiceBtnYes {
+  background: #721f14;
+  color: #f5efe6;
+}
+
+.choiceBtnYes:not(:disabled):hover {
+  background: #49080c;
+}
+
+.choiceBtnNo {
+  background: transparent;
+  color: #7a6248;
+  border: 1px solid #d9c9b0;
+}
+
+.choiceBtnNo:not(:disabled):hover {
+  background: #f0e6d4;
+}
+
+/* ── Menu items ─────────────────────────────────────────────── */
+.menuItems {
+  background: #f5efe6;
+  border: 1px solid #d9c9b0;
+  border-radius: 4px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+}
+
+.menuDivider {
+  height: 1px;
+  background: #d9c9b0;
+}
+
+.menuCourse {
+  font-family: "Raleway", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9a7e5e;
+  min-width: 70px;
+}
+
+.menuDish {
+  font-family: "Playfair Display", serif;
+  font-size: 1rem;
+  color: #3a2a1a;
+}
+
+/* ── Dessert options ────────────────────────────────────────── */
+.dessertOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.hiddenRadio {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.dessertOption {
+  display: block;
+  padding: 0.7rem 1rem;
+  border: 1px solid #d9c9b0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Raleway", sans-serif;
+  font-size: 0.9rem;
+  color: #3a2a1a;
+  background: #fdf8f0;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.dessertOption:hover {
+  background: #f0e6d4;
+  border-color: #b89e7e;
+}
+
+.dessertOptionSelected {
+  border-color: #721f14;
+  background: #f9ede9;
+  color: #49080c;
+  font-weight: 600;
+}
+
+/* ── Fields ─────────────────────────────────────────────────── */
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.fieldLabel {
+  font-family: "Raleway", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9a7e5e;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d9c9b0;
+  border-radius: 4px;
+  background: #fdf8f0;
+  font-family: "Raleway", sans-serif;
+  font-size: 0.95rem;
+  color: #3a2a1a;
+  outline: none;
+  transition: border-color 0.2s;
+  resize: vertical;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: #b5a08a;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: #721f14;
+}
+
+/* ── Navigation row ─────────────────────────────────────────── */
+.navRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: "Raleway", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #9a7e5e;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 0;
+  transition: color 0.2s;
+}
+
+.backBtn:hover {
+  color: #3a2a1a;
+}
+
+.nextBtn,
+.submitBtn {
+  padding: 0.75rem 1.75rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-family: "Raleway", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: #721f14;
+  color: #f5efe6;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.nextBtn:hover:not(:disabled),
+.submitBtn:hover:not(:disabled) {
+  background: #49080c;
+}
+
+.nextBtn:disabled,
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Error ──────────────────────────────────────────────────── */
+.errorMsg {
+  font-family: "Raleway", sans-serif;
+  font-size: 0.85rem;
+  color: #c0392b;
+  text-align: center;
+  padding: 0.5rem;
+}

@@ -87,7 +87,7 @@ export default function InviteList({ data, allGuests, allInvites = [] }) {
   const handleGenerateQR = async () => {
     if (!selectedInvite) return;
     setQrLoading(true);
-    const baseUrl = window.location.origin;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
     const result = await generateQRCode(selectedInvite.id, baseUrl);
     if (result.data?.qr_svg) {
       setQrSvg(result.data.qr_svg);

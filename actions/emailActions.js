@@ -103,6 +103,66 @@ export async function sendEmailToGuest(email, subject, htmlContent) {
   }
 }
 
+export async function sendRsvpNotification(guest) {
+  const attending = guest.rsvpStatus === 'attending';
+  const subject = `RSVP: ${guest.name} is ${attending ? 'attending' : 'not attending'} your wedding 🎉`;
+
+  const html = `
+    <div style="font-family: Georgia, serif; max-width: 520px; margin: 0 auto; padding: 32px 24px; background: #fdf8f0; border: 1px solid #d9c9b0; border-radius: 6px;">
+      <h1 style="font-size: 1.6rem; color: #49080c; margin: 0 0 8px;">New RSVP received</h1>
+      <p style="color: #7a6248; font-size: 0.95rem; margin: 0 0 24px;">A guest has just submitted their RSVP.</p>
+
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+        <tr>
+          <td style="padding: 10px 0; border-bottom: 1px solid #e8d8c0; color: #9a7e5e; width: 40%;">Guest</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #e8d8c0; color: #3a2a1a; font-weight: bold;">${guest.name}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 0; border-bottom: 1px solid #e8d8c0; color: #9a7e5e;">Status</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #e8d8c0; color: ${attending ? '#4a7a3a' : '#c0392b'}; font-weight: bold;">
+            ${attending ? 'Attending ✓' : 'Not attending ✗'}
+          </td>
+        </tr>
+        ${attending ? `
+        <tr>
+          <td style="padding: 10px 0; border-bottom: 1px solid #e8d8c0; color: #9a7e5e;">Dessert</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #e8d8c0; color: #3a2a1a;">${guest.dessert || '—'}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 0; border-bottom: 1px solid #e8d8c0; color: #9a7e5e;">Dietary</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #e8d8c0; color: #3a2a1a;">${guest.dietry || 'None'}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 0; border-bottom: 1px solid #e8d8c0; color: #9a7e5e;">Allergies</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #e8d8c0; color: #3a2a1a;">${guest.allergies || 'None'}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 0; border-bottom: 1px solid #e8d8c0; color: #9a7e5e;">Song request</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #e8d8c0; color: #3a2a1a;">${guest.songRequest || '—'}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 0; color: #9a7e5e;">Email</td>
+          <td style="padding: 10px 0; color: #3a2a1a;">${guest.email || '—'}</td>
+        </tr>
+        ` : ''}
+      </table>
+
+      <p style="margin: 28px 0 0; font-size: 0.8rem; color: #b5a08a; font-style: italic;">Tom &amp; Sam · 10.10.26</p>
+    </div>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: `"Tom and Sam's Wedding" <${process.env.SMTP_FROM}>`,
+      to: ['tom_canham@yahoo.co.uk', 'samanthabettany20@gmail.com'],
+      subject,
+      html,
+    });
+  } catch (err) {
+    console.error('[RSVP notification] Failed to send email:', err.message);
+  }
+}
+
 export async function sendTestEmail(to, subject, htmlContent) {
   try {
     await transporter.sendMail({

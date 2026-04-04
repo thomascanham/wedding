@@ -58,13 +58,10 @@ export default function InviteManager({ invitesData, guestsData }) {
   const { data: invites = [], error: invitesError } = invitesData || {};
   const { data: guests = [] } = guestsData || {};
 
-  // Build set of guest IDs already assigned to any invite
-  const assignedGuestIds = new Set(invites.flatMap((inv) => inv.guest || []));
-
   // Combine existing guests with newly created ones for the dropdown
   const allAvailableGuests = [...(guests || []), ...newlyCreatedGuests];
   const guestOptions = allAvailableGuests
-    .filter((guest) => guest.id && guest.name && !assignedGuestIds.has(guest.id))
+    .filter((guest) => guest.id && guest.name)
     .map((guest) => ({
       value: guest.id,
       label: guest.name,
@@ -150,7 +147,7 @@ export default function InviteManager({ invitesData, guestsData }) {
 
   const handleGenerateAllQRCodes = async () => {
     setQrAllLoading(true);
-    const baseUrl = window.location.origin;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
     await generateAllQRCodes(baseUrl);
     setQrAllLoading(false);
     router.refresh();

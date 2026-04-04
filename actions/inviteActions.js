@@ -45,6 +45,23 @@ async function enrichInvitesWithGuests(inviteRows) {
   });
 }
 
+export async function fetchInviteById(id) {
+  try {
+    const [record] = await db.select().from(invites).where(eq(invites.id, id));
+    if (!record) return { data: null, error: false };
+    const enriched = await enrichInvitesWithGuests([record]);
+    return {
+      data: enriched[0],
+      error: false,
+    }
+  } catch (error) {
+    return {
+      data: null,
+      error: { message: error.message },
+    }
+  }
+}
+
 export async function fetchAllInvites() {
   try {
     const records = await db.select().from(invites).orderBy(invites.name);

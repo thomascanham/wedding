@@ -39,7 +39,6 @@ const data = [
 
 export default function RouteCards({ guestCount, inviteCount, roomCount }) {
   const counts = { guestCount, inviteCount, roomCount };
-
   return (
     <SimpleGrid
       py="xl"
