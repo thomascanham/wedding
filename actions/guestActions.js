@@ -124,6 +124,30 @@ export async function submitGuestRsvp(id, { attending, dessert, dietry, allergie
   }
 }
 
+export async function submitReceptionRsvp(id, { attending, dietry, allergies, email }) {
+  try {
+    const now = new Date().toISOString();
+    const fields = {
+      rsvpStatus: attending ? 'attending' : 'declined',
+      hasCheckedIn: true,
+      updated: now,
+    };
+
+    if (attending) {
+      fields.dietry = dietry || null;
+      fields.allergies = allergies || null;
+      fields.email = email || null;
+    }
+
+    await db.update(guests).set(fields).where(eq(guests.id, id));
+    const [record] = await db.select().from(guests).where(eq(guests.id, id));
+    await sendRsvpNotification(record);
+    return { data: record, error: false };
+  } catch (error) {
+    return { data: null, error: { message: error.message } };
+  }
+}
+
 export async function deleteGuest(id) {
   try {
     await db.delete(guests).where(eq(guests.id, id));

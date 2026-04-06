@@ -1,6 +1,5 @@
 'use client';
 import Link from 'next/link';
-import Image from 'next/image';
 import { IconCheck } from '@tabler/icons-react';
 import classes from './InviteLanding.module.css';
 
@@ -10,21 +9,24 @@ export default function InviteLanding({ invite }) {
   return (
     <div className={classes.page}>
       {/* Hero */}
-      <div className={classes.hero}>
-        <Image
-          src="/images/guestHero.jpg"
-          alt="Wedding venue"
-          fill
-          style={{ objectFit: 'cover', objectPosition: 'center' }}
-          priority
-        />
-        <div className={classes.heroOverlay} />
+      <div
+        className={classes.hero}
+        style={{
+          backgroundImage: `linear-gradient(0deg, rgba(0,0,0,0.4)),url('${invite.attendance === 'reception' ? '/images/guestHero.jpg' : '/images/guestHero.jpg'}')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
         <div className={classes.heroContent}>
-          <p className={classes.heroEyebrow}>You&apos;re invited to celebrate</p>
+          <p className={classes.heroEyebrow}>
+            {invite.attendance === 'reception' ? 'You\'re invited to join us for a' : 'You\'re invited to celebrate'}
+          </p>
           <h1 className={classes.heroTitle}>Tom &amp; Sam</h1>
           <p className={classes.heroDate}>10 · 10 · 26</p>
           <div className={classes.heroDivider} />
-          <p className={classes.heroVenue}>are getting married</p>
+          <p className={classes.heroVenue}>
+            {invite.attendance === 'reception' ? 'Wedding Reception' : 'are getting married'}
+          </p>
         </div>
       </div>
 
