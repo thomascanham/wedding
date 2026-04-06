@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Paper, Title, Group, Divider } from "@mantine/core";
 import RouteCards from "@/components/admin/dashboard/RouteCards";
 import StatCards from "@/components/admin/dashboard/StatCards";
