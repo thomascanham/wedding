@@ -5,7 +5,7 @@ import { submitGuestRsvp } from '@/actions/guestActions';
 import classes from './RsvpForm.module.css';
 
 const DESSERT_OPTIONS = [
-  { value: 'cheesecake', label: 'Baked Vanilla Cheesecake' },
+  { value: 'cheesecake', label: 'Baked Vanilla Cheesecake with Raspberry Coulis' },
   { value: 'sticky_toffee', label: 'Sticky Toffee Pudding with Custard' },
 ];
 
@@ -159,18 +159,18 @@ function StepMeal({ dessert, setDessert, onNext, onBack }) {
     <div className={classes.step}>
       <h2 className={classes.stepTitle}>Your menu</h2>
       <p className={classes.stepText}>
-        Here&apos;s what&apos;s on the menu. Please choose your dessert below.
+        We&apos;ve taken care of the starter and main course, all that&apos;s left is the important decision… dessert
       </p>
 
       <div className={classes.menuItems}>
         <div className={classes.menuItem}>
           <span className={classes.menuCourse}>Starter</span>
-          <span className={classes.menuDish}>Antipasto Board</span>
+          <span className={classes.menuDish}>Rustic Antipasti Sharing Boards</span>
         </div>
         <div className={classes.menuDivider} />
         <div className={classes.menuItem}>
           <span className={classes.menuCourse}>Main</span>
-          <span className={classes.menuDish}>Spanish Style Tapas</span>
+          <span className={classes.menuDish}>Spanish Inspired Tapas Feast</span>
         </div>
         <div className={classes.menuDivider} />
         <div className={classes.menuItem} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.75rem' }}>
