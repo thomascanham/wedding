@@ -173,23 +173,24 @@ function StepMeal({ dessert, setDessert, onNext, onBack }) {
           <span className={classes.menuDish}>Spanish Inspired Tapas Feast</span>
         </div>
         <div className={classes.menuDivider} />
-        <div className={classes.menuItem} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.75rem' }}>
+        <div className={classes.menuItem}>
           <span className={classes.menuCourse}>Dessert</span>
-          <div className={classes.dessertOptions}>
-            {DESSERT_OPTIONS.map((opt) => (
-              <label key={opt.value} className={`${classes.dessertOption} ${dessert === opt.value ? classes.dessertOptionSelected : ''}`}>
-                <input
-                  type="radio"
-                  name="dessert"
-                  value={opt.value}
-                  checked={dessert === opt.value}
-                  onChange={() => setDessert(opt.value)}
-                  className={classes.hiddenRadio}
-                />
-                {opt.label}
-              </label>
-            ))}
-          </div>
+          <span className={classes.menuDish}>Please choose from the following</span>
+        </div>
+        <div className={classes.dessertOptions}>
+          {DESSERT_OPTIONS.map((opt) => (
+            <label key={opt.value} className={`${classes.dessertOption} ${dessert === opt.value ? classes.dessertOptionSelected : ''}`}>
+              <input
+                type="radio"
+                name="dessert"
+                value={opt.value}
+                checked={dessert === opt.value}
+                onChange={() => setDessert(opt.value)}
+                className={classes.hiddenRadio}
+              />
+              {opt.label}
+            </label>
+          ))}
         </div>
       </div>
 

@@ -1,13 +1,13 @@
 'use client'
 import { useRouter } from 'next/navigation';
-import { Alert, Table, Badge, Text, Avatar, Group, Drawer, Stack, Divider, Modal, Button, TextInput } from "@mantine/core";
+import { Alert, Table, Badge, Text, Avatar, Group, Drawer, Stack, Box, SimpleGrid, Modal, Button, TextInput } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
 import { useState } from 'react';
 import { RichTextEditor, Link } from '@mantine/tiptap';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
-import { IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle, IconTrash, IconSend } from '@tabler/icons-react';
+import { IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle, IconTrash, IconSend, IconMusic } from '@tabler/icons-react';
 import getGuestInitials from '@/lib/getGuestInitials';
 import { deleteGuest, toggleGuestHoop } from '@/actions/guestActions';
 import { sendEmailToGuest } from '@/actions/emailActions';
@@ -392,143 +392,117 @@ export default function GuestList({ data }) {
 function GuestDrawerContent({ guest, onDelete, onEmail, hoop, hoopLoading, onToggleHoop }) {
   const attendance = guest.attendanceType === 'reception' ? 'Reception' : 'Ceremony';
 
-  const getRsvpBadge = () => {
-    if (!guest.rsvpStatus) {
-      return <Badge color="gray" size="lg" ff="text">Not Replied</Badge>;
-    }
-    if (guest.rsvpStatus === 'attending') {
-      return <Badge color="green" size="lg" ff="text">Attending</Badge>;
-    }
-    return <Badge color="red" size="lg" ff="text">Not Attending</Badge>;
+  const getRsvpColor = () => {
+    if (!guest.rsvpStatus) return 'gray';
+    return guest.rsvpStatus === 'attending' ? 'green' : 'red';
   };
 
-  const dividerStyles = {
-    label: {
-      color: 'var(--custom-theme-heading)',
-      fontWeight: 600,
-      fontSize: 'var(--mantine-font-size-md)',
-      fontFamily: 'var(--mantine-font-family-headings)',
-    },
+  const getRsvpLabel = () => {
+    if (!guest.rsvpStatus) return 'Not Replied';
+    return guest.rsvpStatus === 'attending' ? 'Attending' : 'Not Attending';
   };
+
+  const section = {
+    backgroundColor: 'white',
+    border: '1px solid var(--mantine-color-gray-2)',
+    borderRadius: 'var(--mantine-radius-md)',
+    padding: 'var(--mantine-spacing-md)',
+  };
+
+  const sectionLabel = { size: 'xs', c: 'dimmed', ff: 'text', tt: 'uppercase', fw: 700, mb: 8 };
 
   return (
-    <Stack gap="lg" pt="md">
-      <Group justify="space-between">
-        <Text size="md" c="var(--custom-theme-text)" ff="text" fw={500}>Guest Type</Text>
-        <Badge color="var(--custom-theme-heading)" variant="light" size="lg" ff="text">{attendance}</Badge>
-      </Group>
+    <Stack gap="sm" pt="md">
 
-      <Group justify="space-between">
-        <Text size="md" c="var(--custom-theme-text)" ff="text" fw={500}>RSVP Status</Text>
-        {getRsvpBadge()}
-      </Group>
+      {/* Status */}
+      <SimpleGrid cols={2} spacing="sm">
+        <Box style={section}>
+          <Text {...sectionLabel}>Guest Type</Text>
+          <Badge color="var(--custom-theme-heading)" variant="light" ff="text">{attendance}</Badge>
+        </Box>
+        <Box style={section}>
+          <Text {...sectionLabel}>RSVP</Text>
+          <Badge color={getRsvpColor()} ff="text">{getRsvpLabel()}</Badge>
+        </Box>
+        <Box style={section}>
+          <Text {...sectionLabel}>Checked In</Text>
+          <Badge color={guest.hasCheckedIn ? 'green' : 'gray'} ff="text">{guest.hasCheckedIn ? 'Yes' : 'No'}</Badge>
+        </Box>
+        <Box style={section}>
+          <Text {...sectionLabel}>Hoop</Text>
+          <Group gap="xs" align="center">
+            <Badge color={hoop ? 'green' : 'gray'} ff="text">{hoop ? 'Yes' : 'No'}</Badge>
+            <Button size="compact-xs" variant="subtle" color={hoop ? 'red' : 'green'} onClick={onToggleHoop} loading={hoopLoading} ff="text">
+              {hoop ? 'Remove' : 'Add'}
+            </Button>
+          </Group>
+        </Box>
+      </SimpleGrid>
 
-      <Group justify="space-between">
-        <Text size="md" c="var(--custom-theme-text)" ff="text" fw={500}>Checked In</Text>
-        <Badge color={guest.hasCheckedIn ? 'green' : 'gray'} size="lg" ff="text">
-          {guest.hasCheckedIn ? 'Yes' : 'No'}
-        </Badge>
-      </Group>
+      {/* Contact */}
+      <Box style={section}>
+        <Text {...sectionLabel}>Contact</Text>
+        <Stack gap="xs">
+          <Group gap="sm">
+            <IconPhone size={15} color="var(--mantine-color-gray-5)" />
+            <Text size="sm" c={guest.phone ? 'var(--custom-theme-text)' : 'dimmed'} ff="text" fs={guest.phone ? undefined : 'italic'}>{guest.phone || 'No phone number'}</Text>
+          </Group>
+          <Group gap="sm">
+            <IconMail size={15} color="var(--mantine-color-gray-5)" />
+            <Text size="sm" c={guest.email ? 'var(--custom-theme-text)' : 'dimmed'} ff="text" fs={guest.email ? undefined : 'italic'}>{guest.email || 'No email address'}</Text>
+          </Group>
+        </Stack>
+      </Box>
 
-      <Group justify="space-between">
-        <Text size="md" c="var(--custom-theme-text)" ff="text" fw={500}>Hoop</Text>
+      {/* Menu */}
+      <Box style={section}>
+        <Text {...sectionLabel}>Menu</Text>
+        <Stack gap="xs">
+          {[['Starter', guest.starter], ['Main', guest.main], ['Dessert', guest.dessert]].map(([label, value]) => (
+            <Group key={label} justify="space-between">
+              <Text size="sm" c="dimmed" ff="text">{label}</Text>
+              <Text size="sm" c={value ? 'var(--custom-theme-heading)' : 'dimmed'} ff="text" fw={value ? 600 : 400} fs={value ? undefined : 'italic'} tt="capitalize">{value || '—'}</Text>
+            </Group>
+          ))}
+        </Stack>
+      </Box>
+
+      {/* Dietary */}
+      <Box style={section}>
+        <Text {...sectionLabel}>Dietary</Text>
+        <Stack gap="xs">
+          <Group gap="sm" align="flex-start">
+            <IconToolsKitchen2 size={15} color="var(--mantine-color-gray-5)" style={{ marginTop: 2 }} />
+            <Text size="sm" c={guest.dietry ? 'var(--custom-theme-text)' : 'dimmed'} ff="text" fs={guest.dietry ? undefined : 'italic'}>{guest.dietry || 'No requirements'}</Text>
+          </Group>
+          <Group gap="sm" align="flex-start">
+            <IconAlertCircle size={15} color={guest.allergies ? 'red' : 'var(--mantine-color-gray-5)'} style={{ marginTop: 2 }} />
+            <Text size="sm" c={guest.allergies ? 'var(--custom-theme-text)' : 'dimmed'} ff="text" fs={guest.allergies ? undefined : 'italic'}>{guest.allergies || 'No allergies'}</Text>
+          </Group>
+        </Stack>
+      </Box>
+
+      {/* Song Request */}
+      <Box style={section}>
+        <Text {...sectionLabel}>Song Request</Text>
         <Group gap="sm">
-          <Badge color={hoop ? 'green' : 'gray'} size="lg" ff="text">
-            {hoop ? 'Yes' : 'No'}
-          </Badge>
-          <Button
-            size="xs"
-            variant="outline"
-            color={hoop ? 'red' : 'green'}
-            onClick={onToggleHoop}
-            loading={hoopLoading}
-            ff="text"
-          >
-            {hoop ? 'Remove' : 'Add'}
+          <IconMusic size={15} color="var(--mantine-color-gray-5)" />
+          <Text size="sm" c={guest.songRequest ? 'var(--custom-theme-text)' : 'dimmed'} ff="text" fs={guest.songRequest ? undefined : 'italic'}>{guest.songRequest || 'No request'}</Text>
+        </Group>
+      </Box>
+
+      {/* Actions */}
+      <Group grow gap="sm" mt="xs">
+        {guest.email && (
+          <Button variant="outline" color="var(--custom-theme-heading)" leftSection={<IconSend size={15} />} onClick={onEmail} ff="text">
+            Email
           </Button>
-        </Group>
-      </Group>
-
-      <Divider label="Contact" labelPosition="left" styles={dividerStyles} />
-
-      {guest.phone && (
-        <Group gap="sm">
-          <IconPhone size={20} color="var(--custom-theme-text)" />
-          <Text size="md" c="var(--custom-theme-text)" ff="text">{guest.phone}</Text>
-        </Group>
-      )}
-
-      {guest.email && (
-        <Group gap="sm">
-          <IconMail size={20} color="var(--custom-theme-text)" />
-          <Text size="md" c="var(--custom-theme-text)" ff="text">{guest.email}</Text>
-        </Group>
-      )}
-
-      {!guest.phone && !guest.email && (
-        <Text size="md" c="var(--custom-theme-text)" ff="text" fs="italic">No contact information</Text>
-      )}
-
-      <Divider label="Menu Choices" labelPosition="left" styles={dividerStyles} />
-
-      <Group justify="space-between">
-        <Text size="md" c="var(--custom-theme-text)" ff="text" fw={500}>Starter</Text>
-        <Text size="md" c="var(--custom-theme-heading)" ff="text" fw={600} tt="capitalize">{guest.starter || '—'}</Text>
-      </Group>
-
-      <Group justify="space-between">
-        <Text size="md" c="var(--custom-theme-text)" ff="text" fw={500}>Main</Text>
-        <Text size="md" c="var(--custom-theme-heading)" ff="text" fw={600} tt="capitalize">{guest.main || '—'}</Text>
-      </Group>
-
-      <Group justify="space-between">
-        <Text size="md" c="var(--custom-theme-text)" ff="text" fw={500}>Dessert</Text>
-        <Text size="md" c="var(--custom-theme-heading)" ff="text" fw={600} tt="capitalize">{guest.dessert || '—'}</Text>
-      </Group>
-
-      {(guest.dietry || guest.allergies) && (
-        <>
-          <Divider label="Dietary Requirements" labelPosition="left" styles={dividerStyles} />
-
-          {guest.dietry && (
-            <Group gap="sm" align="flex-start">
-              <IconToolsKitchen2 size={20} color="var(--custom-theme-text)" />
-              <Text size="md" c="var(--custom-theme-text)" ff="text">{guest.dietry}</Text>
-            </Group>
-          )}
-
-          {guest.allergies && (
-            <Group gap="sm" align="flex-start">
-              <IconAlertCircle size={20} color="red" />
-              <Text size="md" c="var(--custom-theme-text)" ff="text">{guest.allergies}</Text>
-            </Group>
-          )}
-        </>
-      )}
-
-      <Divider label="Actions" labelPosition="left" styles={dividerStyles} />
-
-      {guest.email && (
-        <Button
-          variant="outline"
-          color="var(--custom-theme-heading)"
-          leftSection={<IconSend size={18} />}
-          onClick={onEmail}
-          fullWidth
-        >
-          Send Email
+        )}
+        <Button variant="outline" color="red" leftSection={<IconTrash size={15} />} onClick={onDelete} ff="text">
+          Delete
         </Button>
-      )}
+      </Group>
 
-      <Button
-        variant="outline"
-        color="red"
-        leftSection={<IconTrash size={18} />}
-        onClick={onDelete}
-        fullWidth
-      >
-        Delete Guest
-      </Button>
     </Stack>
   );
 }

@@ -150,9 +150,11 @@
 
 .menuItem {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.6rem 0;
+  text-align: center;
+  padding: 0.85rem 0;
+  gap: 0.3rem;
 }
 
 .menuDivider {
@@ -162,12 +164,11 @@
 
 .menuCourse {
   font-family: "Raleway", sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: #9a7e5e;
-  min-width: 70px;
 }
 
 .menuDish {
