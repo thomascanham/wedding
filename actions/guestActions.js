@@ -124,7 +124,7 @@ export async function submitGuestRsvp(id, { attending, dessert, dietry, allergie
   }
 }
 
-export async function submitReceptionRsvp(id, { attending, dietry, allergies, email }) {
+export async function submitReceptionRsvp(id, { attending, eveningMeal, dietry, allergies, email }) {
   try {
     const now = new Date().toISOString();
     const fields = {
@@ -134,6 +134,7 @@ export async function submitReceptionRsvp(id, { attending, dietry, allergies, em
     };
 
     if (attending) {
+      fields.eveningMeal = eveningMeal || null;
       fields.dietry = dietry || null;
       fields.allergies = allergies || null;
       fields.email = email || null;

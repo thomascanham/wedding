@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { submitReceptionRsvp } from '@/actions/guestActions';
 import classes from './RsvpForm.module.css';
 
-const TOTAL_STEPS = 3; // attending, dietary, email
+const TOTAL_STEPS = 4; // attending, food choice, dietary, email
 
 export default function RsvpFormReception({ guest, inviteId }) {
   const router = useRouter();
@@ -13,6 +13,7 @@ export default function RsvpFormReception({ guest, inviteId }) {
   const [error, setError] = useState(null);
 
   const [attending, setAttending] = useState(null);
+  const [eveningMeal, setEveningMeal] = useState('');
   const [dietry, setDietry] = useState('');
   const [allergies, setAllergies] = useState('');
   const [email, setEmail] = useState('');
@@ -37,6 +38,7 @@ export default function RsvpFormReception({ guest, inviteId }) {
     setSubmitting(true);
     const result = await submitReceptionRsvp(guest.id, {
       attending: true,
+      eveningMeal,
       dietry,
       allergies,
       email,
@@ -82,21 +84,29 @@ export default function RsvpFormReception({ guest, inviteId }) {
             />
           )}
           {step === 2 && (
-            <StepDietary
-              dietry={dietry}
-              setDietry={setDietry}
-              allergies={allergies}
-              setAllergies={setAllergies}
+            <StepFoodChoice
+              eveningMeal={eveningMeal}
+              setEveningMeal={setEveningMeal}
               onNext={() => setStep(3)}
               onBack={() => setStep(1)}
             />
           )}
           {step === 3 && (
+            <StepDietary
+              dietry={dietry}
+              setDietry={setDietry}
+              allergies={allergies}
+              setAllergies={setAllergies}
+              onNext={() => setStep(4)}
+              onBack={() => setStep(2)}
+            />
+          )}
+          {step === 4 && (
             <StepEmail
               email={email}
               setEmail={setEmail}
               onSubmit={handleFinalSubmit}
-              onBack={() => setStep(2)}
+              onBack={() => setStep(3)}
               submitting={submitting}
             />
           )}
@@ -128,13 +138,51 @@ function StepAttending({ guestName, onAttend, onDecline, submitting }) {
   );
 }
 
-/* ── Step 2: Dietary ─────────────────────────────────────────── */
-function StepDietary({ dietry, setDietry, allergies, setAllergies, onNext, onBack }) {
+/* ── Step 2: Food choice ─────────────────────────────────────── */
+function StepFoodChoice({ eveningMeal, setEveningMeal, onNext, onBack }) {
+  const options = [
+    { value: 'Hog Roast', label: 'Hog Roast' },
+    { value: 'Vegetarian / Vegan', label: 'Vegetarian / Vegan' },
+  ];
+
   return (
     <div className={classes.step}>
       <h2 className={classes.stepTitle}>Evening food</h2>
       <p className={classes.stepText}>
-        We&apos;ll be serving a <strong>hog roast</strong> for the evening food. Please let us know if you have any dietary requirements or allergies we should be aware of.
+        We&apos;ll be serving a hog roast for the evening. Please choose your option below.
+      </p>
+
+      <div className={classes.dessertOptions}>
+        {options.map((opt) => (
+          <label key={opt.value} className={`${classes.dessertOption} ${eveningMeal === opt.value ? classes.dessertOptionSelected : ''}`}>
+            <input
+              type="radio"
+              name="eveningMeal"
+              value={opt.value}
+              checked={eveningMeal === opt.value}
+              onChange={() => setEveningMeal(opt.value)}
+              className={classes.hiddenRadio}
+            />
+            {opt.label}
+          </label>
+        ))}
+      </div>
+
+      <div className={classes.navRow}>
+        <button className={classes.backBtn} onClick={onBack}>← Back</button>
+        <button className={classes.nextBtn} onClick={onNext} disabled={!eveningMeal}>Next →</button>
+      </div>
+    </div>
+  );
+}
+
+/* ── Step 3: Dietary ─────────────────────────────────────────── */
+function StepDietary({ dietry, setDietry, allergies, setAllergies, onNext, onBack }) {
+  return (
+    <div className={classes.step}>
+      <h2 className={classes.stepTitle}>Dietary requirements</h2>
+      <p className={classes.stepText}>
+        Do you have any dietary requirements or allergies we should know about? Leave blank if none.
       </p>
 
       <div className={classes.fieldGroup}>

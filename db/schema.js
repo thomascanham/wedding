@@ -17,6 +17,7 @@ export const guests = mysqlTable('guests', {
   dessert: varchar('dessert', { length: 255 }),
   dietry: text('dietry'),
   allergies: text('allergies'),
+  eveningMeal: varchar('eveningMeal', { length: 255 }),
   songRequest: varchar('songRequest', { length: 500 }),
   created: varchar('created', { length: 255 }).$defaultFn(() => new Date().toISOString()),
   updated: varchar('updated', { length: 255 }).$defaultFn(() => new Date().toISOString()),

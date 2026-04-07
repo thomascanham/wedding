@@ -361,7 +361,7 @@ function GuestDrawerContent({ guest, onDelete, onEmail, hoop, hoopLoading, onTog
       <Box style={section}>
         <Text {...sectionLabel}>Menu</Text>
         <Stack gap="xs">
-          {[['Starter', guest.starter], ['Main', guest.main], ['Dessert', guest.dessert]].map(([label, value]) => (
+          {[['Starter', guest.starter], ['Main', guest.main], ['Dessert', guest.dessert], ['Evening Meal', guest.eveningMeal]].map(([label, value]) => (
             <Group key={label} justify="space-between">
               <Text size="sm" c="dimmed" ff="text">{label}</Text>
               <Text size="sm" c={value ? 'var(--custom-theme-heading)' : 'dimmed'} ff="text" fw={value ? 600 : 400} fs={value ? undefined : 'italic'} tt="capitalize">{value || '—'}</Text>
