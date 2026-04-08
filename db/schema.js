@@ -52,3 +52,11 @@ export const roomGuests = mysqlTable('room_guests', {
   room_id: varchar('room_id', { length: 36 }).notNull().references(() => rooms.id, { onDelete: 'cascade' }),
   guest_id: varchar('guest_id', { length: 36 }).notNull().references(() => guests.id, { onDelete: 'cascade' }),
 });
+
+export const adminUsers = mysqlTable('admin_users', {
+  id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+  email: varchar('email', { length: 255 }).notNull(),
+  passwordHash: varchar('passwordHash', { length: 255 }).notNull(),
+  created: varchar('created', { length: 255 }).$defaultFn(() => new Date().toISOString()),
+  updated: varchar('updated', { length: 255 }).$defaultFn(() => new Date().toISOString()),
+});

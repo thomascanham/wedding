@@ -19,10 +19,11 @@ export default function proxy(req) {
     return NextResponse.next();
   }
 
-  // Redirect to login
+  // Redirect to login — only pass local paths as returnTo to prevent open redirects
   const url = req.nextUrl.clone();
   url.pathname = UNLOCK_PATH;
-  url.searchParams.set('returnTo', pathname || '/admin');
+  const safePath = pathname?.startsWith('/') && !pathname.startsWith('//') ? pathname : '/admin';
+  url.searchParams.set('returnTo', safePath);
 
   return NextResponse.redirect(url);
 }
