@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { redirect } from 'next/navigation';
 import { db } from '@/database';
 import { adminUsers } from '@/db/schema';
