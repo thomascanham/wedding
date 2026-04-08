@@ -90,7 +90,7 @@ export async function fetchGuestById(id) {
   }
 }
 
-export async function submitGuestRsvp(id, { attending, dessert, dietry, allergies, songRequest, email }) {
+export async function submitGuestRsvp(id, { attending, dessert, eveningMeal, dietry, allergies, songRequest, email }) {
   try {
     const now = new Date().toISOString();
     const fields = {
@@ -103,6 +103,7 @@ export async function submitGuestRsvp(id, { attending, dessert, dietry, allergie
       fields.starter = 'Antipasto board';
       fields.main = 'Spanish Style Tapas';
       fields.dessert = dessert || null;
+      fields.eveningMeal = eveningMeal || null;
       fields.dietry = dietry || null;
       fields.allergies = allergies || null;
       fields.songRequest = songRequest || null;

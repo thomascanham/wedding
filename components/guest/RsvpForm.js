@@ -9,7 +9,7 @@ const DESSERT_OPTIONS = [
   { value: 'sticky_toffee', label: 'Sticky Toffee Pudding with Custard' },
 ];
 
-const TOTAL_STEPS = 5; // attending, meal, dietary, song, email
+const TOTAL_STEPS = 6; // attending, meal, evening meal, dietary, song, email
 
 export default function RsvpForm({ guest, inviteId }) {
   const router = useRouter();
@@ -19,6 +19,7 @@ export default function RsvpForm({ guest, inviteId }) {
 
   const [attending, setAttending] = useState(null);
   const [dessert, setDessert] = useState('');
+  const [eveningMeal, setEveningMeal] = useState('');
   const [dietry, setDietry] = useState('');
   const [allergies, setAllergies] = useState('');
   const [songRequest, setSongRequest] = useState('');
@@ -45,6 +46,7 @@ export default function RsvpForm({ guest, inviteId }) {
     const result = await submitGuestRsvp(guest.id, {
       attending: true,
       dessert,
+      eveningMeal,
       dietry,
       allergies,
       songRequest,
@@ -99,29 +101,37 @@ export default function RsvpForm({ guest, inviteId }) {
             />
           )}
           {step === 3 && (
-            <StepDietary
-              dietry={dietry}
-              setDietry={setDietry}
-              allergies={allergies}
-              setAllergies={setAllergies}
+            <StepEveningMeal
+              eveningMeal={eveningMeal}
+              setEveningMeal={setEveningMeal}
               onNext={() => setStep(4)}
               onBack={() => setStep(2)}
             />
           )}
           {step === 4 && (
-            <StepSong
-              songRequest={songRequest}
-              setSongRequest={setSongRequest}
+            <StepDietary
+              dietry={dietry}
+              setDietry={setDietry}
+              allergies={allergies}
+              setAllergies={setAllergies}
               onNext={() => setStep(5)}
               onBack={() => setStep(3)}
             />
           )}
           {step === 5 && (
+            <StepSong
+              songRequest={songRequest}
+              setSongRequest={setSongRequest}
+              onNext={() => setStep(6)}
+              onBack={() => setStep(4)}
+            />
+          )}
+          {step === 6 && (
             <StepEmail
               email={email}
               setEmail={setEmail}
               onSubmit={handleFinalSubmit}
-              onBack={() => setStep(4)}
+              onBack={() => setStep(5)}
               submitting={submitting}
             />
           )}
@@ -204,7 +214,45 @@ function StepMeal({ dessert, setDessert, onNext, onBack }) {
   );
 }
 
-/* ── Step 3: Dietary ─────────────────────────────────────────── */
+/* ── Step 3: Evening meal ────────────────────────────────────── */
+function StepEveningMeal({ eveningMeal, setEveningMeal, onNext, onBack }) {
+  const options = [
+    { value: 'Hog Roast', label: 'Hog Roast' },
+    { value: 'Vegetarian / Vegan', label: 'Vegetarian / Vegan' },
+  ];
+
+  return (
+    <div className={classes.step}>
+      <h2 className={classes.stepTitle}>Evening food</h2>
+      <p className={classes.stepText}>
+        We&apos;ll be serving a hog roast for the evening. Please choose your option below.
+      </p>
+
+      <div className={classes.dessertOptions}>
+        {options.map((opt) => (
+          <label key={opt.value} className={`${classes.dessertOption} ${eveningMeal === opt.value ? classes.dessertOptionSelected : ''}`}>
+            <input
+              type="radio"
+              name="eveningMeal"
+              value={opt.value}
+              checked={eveningMeal === opt.value}
+              onChange={() => setEveningMeal(opt.value)}
+              className={classes.hiddenRadio}
+            />
+            {opt.label}
+          </label>
+        ))}
+      </div>
+
+      <div className={classes.navRow}>
+        <button className={classes.backBtn} onClick={onBack}>← Back</button>
+        <button className={classes.nextBtn} onClick={onNext} disabled={!eveningMeal}>Next →</button>
+      </div>
+    </div>
+  );
+}
+
+/* ── Step 4: Dietary ─────────────────────────────────────────── */
 function StepDietary({ dietry, setDietry, allergies, setAllergies, onNext, onBack }) {
   return (
     <div className={classes.step}>
