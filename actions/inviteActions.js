@@ -196,10 +196,21 @@ export async function deleteQRCode(inviteId) {
   }
 }
 
-export async function generateQRCode(inviteId, baseUrl) {
+function addLabelToSvg(svgString, label) {
+  const width = 256;
+  const labelHeight = 28;
+  const totalHeight = width + labelHeight;
+  const viewBoxMatch = svgString.match(/viewBox="([^"]+)"/);
+  const originalViewBox = viewBoxMatch ? viewBoxMatch[1] : `0 0 ${width} ${width}`;
+  const innerContent = svgString.replace(/<svg[^>]*>/, '').replace('</svg>', '');
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${totalHeight}" width="${width}" height="${totalHeight}"><svg viewBox="${originalViewBox}" width="${width}" height="${width}">${innerContent}</svg><text x="${width / 2}" y="${width + 20}" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#721F14">${label}</text></svg>`;
+}
+
+export async function generateQRCode(inviteId, baseUrl, inviteName) {
   try {
     const inviteUrl = `${baseUrl}/invite/${inviteId}`;
-    const svgString = await QRCode.toString(inviteUrl, QR_OPTIONS);
+    const rawSvg = await QRCode.toString(inviteUrl, QR_OPTIONS);
+    const svgString = inviteName ? addLabelToSvg(rawSvg, inviteName) : rawSvg;
 
     await db.update(invites)
       .set({ qr_svg: svgString, updated: new Date().toISOString() })
@@ -225,7 +236,8 @@ export async function generateAllQRCodes(baseUrl) {
 
     for (const invite of allInvites) {
       const inviteUrl = `${baseUrl}/invite/${invite.id}`;
-      const svgString = await QRCode.toString(inviteUrl, QR_OPTIONS);
+      const rawSvg = await QRCode.toString(inviteUrl, QR_OPTIONS);
+      const svgString = addLabelToSvg(rawSvg, invite.name);
 
       await db.update(invites)
         .set({ qr_svg: svgString, updated: new Date().toISOString() })

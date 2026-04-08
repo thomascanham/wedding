@@ -88,7 +88,7 @@ export default function InviteList({ data, allGuests, allInvites = [] }) {
     if (!selectedInvite) return;
     setQrLoading(true);
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
-    const result = await generateQRCode(selectedInvite.id, baseUrl);
+    const result = await generateQRCode(selectedInvite.id, baseUrl, inviteName);
     if (result.data?.qr_svg) {
       setQrSvg(result.data.qr_svg);
     }
@@ -221,6 +221,7 @@ export default function InviteList({ data, allGuests, allInvites = [] }) {
 
             <TextInput
               label="Invite Name"
+              description="For internal use only — guests will not see this name."
               value={inviteName}
               onChange={(e) => setInviteName(e.target.value)}
               styles={labelStyles}

@@ -202,6 +202,7 @@ export default function InviteManager({ invitesData, guestsData }) {
         <Stack gap="md" pt="md">
           <TextInput
             label="Invite Name"
+            description="For internal use only — guests will not see this name."
             placeholder="e.g., Smith Family"
             value={inviteName}
             onChange={(e) => setInviteName(e.target.value)}
