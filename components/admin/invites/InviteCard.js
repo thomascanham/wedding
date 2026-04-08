@@ -20,7 +20,7 @@ import {
   Center,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconMail, IconMailOff, IconTrash, IconUsers, IconQrcode } from '@tabler/icons-react';
+import { IconMail, IconMailOff, IconTrash, IconUsers, IconQrcode, IconDownload } from '@tabler/icons-react';
 import { updateInvite, deleteInvite, addGuestToInvite, generateQRCode, deleteQRCode } from '@/actions/inviteActions';
 
 
@@ -100,6 +100,16 @@ export default function InviteCard({ invite, allGuests, allInvites = [] }) {
     setQrSvg(null);
     setQrLoading(false);
     router.refresh();
+  };
+
+  const handleDownloadQR = () => {
+    const blob = new Blob([qrSvg], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${inviteName}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -261,6 +271,18 @@ export default function InviteCard({ invite, allGuests, allInvites = [] }) {
           >
             {qrSvg ? 'Regenerate QR Code' : 'Generate QR Code'}
           </Button>
+
+          {qrSvg && (
+            <Button
+              variant="outline"
+              color="var(--custom-theme-heading)"
+              leftSection={<IconDownload size={18} />}
+              onClick={handleDownloadQR}
+              fullWidth
+            >
+              Download QR Code
+            </Button>
+          )}
 
           {qrSvg && (
             <Button
