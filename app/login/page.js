@@ -8,7 +8,6 @@ export const metadata = {
 
 export default async function LoginPage({ searchParams }) {
   const parameters = await searchParams;
-  const returnTo = (parameters && parameters.returnTo) || '/';
   const error = parameters?.error;
 
   return (
@@ -24,11 +23,11 @@ export default async function LoginPage({ searchParams }) {
             ) : null}
 
             <form action={Login}>
-              <input type="hidden" name="returnTo" value={returnTo} />
 
               <TextInput
                 name="username"
-                placeholder="username"
+                type="email"
+                placeholder="Email address"
                 required
                 size="lg"
                 py="lg"

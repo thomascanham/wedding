@@ -22,7 +22,6 @@ export async function Login(formData) {
   const cookieStore = await cookies();
   const email = String(formData.get('username') || '').trim().toLowerCase();
   const password = String(formData.get('passcode') || '');
-  const to = sanitiseReturnTo(String(formData.get('returnTo') || ''));
 
   try {
     const [user] = await db.select().from(adminUsers).where(eq(adminUsers.email, email));
@@ -32,7 +31,7 @@ export async function Login(formData) {
     const valid = await bcrypt.compare(password, hashToCompare);
 
     if (!user || !valid) {
-      redirect(`/login?error=1&returnTo=${encodeURIComponent(to)}`);
+      redirect('/login?error=1');
     }
 
     cookieStore.set({
@@ -47,10 +46,10 @@ export async function Login(formData) {
 
   } catch (error) {
     if (error?.digest?.startsWith('NEXT_REDIRECT')) throw error;
-    redirect(`/login?error=1&returnTo=${encodeURIComponent(to)}`);
+    redirect('/login?error=1');
   }
 
-  redirect(to);
+  redirect('/admin');
 }
 
 export async function Logout() {

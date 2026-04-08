@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { SegmentedControl, Box, Group, Text, ActionIcon, Tooltip, Button, Modal, TextInput, Stack, Select } from '@mantine/core';
+import { SegmentedControl, Box, Group, Text, ActionIcon, Tooltip, Button, Modal, TextInput, Stack } from '@mantine/core';
 import { useLocalStorage, useDisclosure } from '@mantine/hooks';
 import { IconLayoutGrid, IconList, IconPlus } from '@tabler/icons-react';
 import GuestGrid from '@/components/admin/layout/GuestGrid';
@@ -51,6 +51,16 @@ export default function GuestFilters({ data }) {
     setLoading(false);
     closeModal();
     router.refresh();
+  };
+
+  const openCeremonyModal = () => {
+    setAttendanceType('ceremony');
+    openModal();
+  };
+
+  const openReceptionModal = () => {
+    setAttendanceType('reception');
+    openModal();
   };
 
   const handleCloseModal = () => {
@@ -109,7 +119,7 @@ export default function GuestFilters({ data }) {
       <Modal
         opened={modalOpened}
         onClose={handleCloseModal}
-        title={<Text fw={700} size="lg" c="var(--custom-theme-heading)" ff="heading">Add New Guest</Text>}
+        title={<Text fw={700} size="lg" c="var(--custom-theme-heading)" ff="heading">Add {attendanceType === 'ceremony' ? 'Ceremony' : 'Reception'} Guest</Text>}
         centered
         styles={{
           content: { backgroundColor: 'var(--custom-theme-fill)' },
@@ -131,18 +141,6 @@ export default function GuestFilters({ data }) {
             placeholder="Enter surname"
             value={surname}
             onChange={(e) => setSurname(e.target.value)}
-            styles={{
-              label: { color: 'var(--custom-theme-text)', fontFamily: 'var(--mantine-font-family)' },
-            }}
-          />
-          <Select
-            label="Attendance Type"
-            value={attendanceType}
-            onChange={setAttendanceType}
-            data={[
-              { label: 'Ceremony', value: 'ceremony' },
-              { label: 'Reception', value: 'reception' },
-            ]}
             styles={{
               label: { color: 'var(--custom-theme-text)', fontFamily: 'var(--mantine-font-family)' },
             }}
@@ -236,9 +234,17 @@ export default function GuestFilters({ data }) {
             <Button
               leftSection={<IconPlus size={18} />}
               color="var(--custom-theme-heading)"
-              onClick={openModal}
+              onClick={openCeremonyModal}
             >
-              Add Guest
+              Add Ceremony Guest
+            </Button>
+            <Button
+              leftSection={<IconPlus size={18} />}
+              color="var(--custom-theme-heading)"
+              variant="outline"
+              onClick={openReceptionModal}
+            >
+              Add Reception Guest
             </Button>
             <Group gap="xs">
               <Tooltip label="Grid view">
