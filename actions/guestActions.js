@@ -15,9 +15,9 @@ export async function fetchAllGuests() {
     }
   } catch (error) {
     return {
-      data: error.message,
+      data: [],
       total: 0,
-      error: true,
+      error: { message: error.message },
     }
   }
 }
