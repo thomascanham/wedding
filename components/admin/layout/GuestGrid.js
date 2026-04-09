@@ -1,7 +1,7 @@
 import { SimpleGrid, Alert } from "@mantine/core";
 import { GuestCard } from "../guests/GuestCard";
 
-export default function GuestGrid({ data }) {
+export default function GuestGrid({ data, assignedGuestIds = [] }) {
   const { data: guests, total, error } = data;
 
   if (error) {
@@ -21,7 +21,7 @@ export default function GuestGrid({ data }) {
         base: 'md', sm: 'xl'
       }}>
       {guests.map((guest) => (
-        <GuestCard key={guest.id} guest={guest} />
+        <GuestCard key={guest.id} guest={guest} onInvite={assignedGuestIds.includes(guest.id)} />
       ))}
     </SimpleGrid>
   )

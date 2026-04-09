@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation';
-import { Alert, Table, Badge, Text, Avatar, Group, Drawer, Stack, Box, SimpleGrid, Modal, Button, TextInput } from "@mantine/core";
+import { Alert, Table, Badge, Text, Avatar, Group, Drawer, Stack, Box, SimpleGrid, Modal, Button, TextInput, Tooltip } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
 import { useState } from 'react';
 import { RichTextEditor, Link } from '@mantine/tiptap';
@@ -12,7 +12,7 @@ import getGuestInitials from '@/lib/getGuestInitials';
 import { deleteGuest, toggleGuestHoop } from '@/actions/guestActions';
 import { sendEmailToGuest } from '@/actions/emailActions';
 
-export default function GuestList({ data }) {
+export default function GuestList({ data, assignedGuestIds = [] }) {
   const router = useRouter();
   const { data: guests, error } = data;
   const [selectedGuest, setSelectedGuest] = useState(null);
@@ -135,6 +135,7 @@ export default function GuestList({ data }) {
   const rows = sortedGuests.map((guest) => {
     const initials = getGuestInitials(guest.firstname, guest.surname);
     const attendance = guest.attendanceType === 'reception' ? 'Reception' : 'Ceremony';
+    const onInvite = assignedGuestIds.includes(guest.id);
 
     return (
       <Table.Tr
@@ -170,6 +171,19 @@ export default function GuestList({ data }) {
           <Badge color={guest.hoop ? 'green' : 'gray'} size="sm" ff="text">
             {guest.hoop ? 'Yes' : 'No'}
           </Badge>
+        </Table.Td>
+        <Table.Td>
+          <Tooltip label={onInvite ? 'On an invite' : 'Not on an invite'}>
+            <Box
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                backgroundColor: onInvite ? 'var(--mantine-color-green-6)' : 'var(--mantine-color-gray-4)',
+                margin: '0 auto',
+              }}
+            />
+          </Tooltip>
         </Table.Td>
       </Table.Tr>
     );
@@ -380,6 +394,7 @@ export default function GuestList({ data }) {
               <Table.Th>RSVP</Table.Th>
               <Table.Th>Checked In</Table.Th>
               <Table.Th>Hoop</Table.Th>
+              <Table.Th>Invite</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>{rows}</Table.Tbody>

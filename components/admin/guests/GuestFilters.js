@@ -10,7 +10,7 @@ import { createGuest } from '@/actions/guestActions';
 
 const VIEW_STORAGE_KEY = 'guest-view-type';
 
-export default function GuestFilters({ data }) {
+export default function GuestFilters({ data, assignedGuestIds = [] }) {
   const router = useRouter();
   const [viewType, setViewType] = useLocalStorage({
     key: VIEW_STORAGE_KEY,
@@ -274,9 +274,9 @@ export default function GuestFilters({ data }) {
         </Group>
 
         {viewType === 'grid' ? (
-          <GuestGrid data={filteredData} />
+          <GuestGrid data={filteredData} assignedGuestIds={assignedGuestIds} />
         ) : (
-          <GuestList data={filteredData} />
+          <GuestList data={filteredData} assignedGuestIds={assignedGuestIds} />
         )}
       </Box>
     </>

@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   SimpleGrid,
@@ -23,7 +23,7 @@ import {
 import { useDisclosure, useLocalStorage } from '@mantine/hooks';
 import { IconPlus, IconX, IconLayoutGrid, IconList, IconQrcode } from '@tabler/icons-react';
 import { createInvite, generateAllQRCodes } from '@/actions/inviteActions';
-import { createGuest } from '@/actions/guestActions';
+import { createGuest, fetchAllGuests } from '@/actions/guestActions';
 import InviteCard from './InviteCard';
 import InviteList from './InviteList';
 
@@ -35,7 +35,7 @@ export default function InviteManager({ invitesData, guestsData }) {
     key: VIEW_STORAGE_KEY,
     defaultValue: 'grid',
   });
-  const [opened, { open, close }] = useDisclosure(false);
+  const [opened, { open: openDrawer, close }] = useDisclosure(false);
   const [inviteName, setInviteName] = useState('');
   const [inviteAttendance, setInviteAttendance] = useState('ceremony');
   const [selectedGuests, setSelectedGuests] = useState([]);
@@ -55,13 +55,32 @@ export default function InviteManager({ invitesData, guestsData }) {
   // Track newly created guests (to show in the list before page refresh)
   const [newlyCreatedGuests, setNewlyCreatedGuests] = useState([]);
 
-  const { data: invites = [], error: invitesError } = invitesData || {};
-  const { data: guests = [] } = guestsData || {};
+  // Guests fetched fresh when the drawer opens — avoids stale/empty initial prop
+  const [drawerGuests, setDrawerGuests] = useState([]);
+  const [drawerGuestsLoading, setDrawerGuestsLoading] = useState(false);
 
-  // Combine existing guests with newly created ones for the dropdown
-  const allAvailableGuests = [...(guests || []), ...newlyCreatedGuests];
+  const { data: invites = [], error: invitesError } = invitesData || {};
+
+  const open = useCallback(async (attendanceType = 'ceremony') => {
+    setInviteAttendance(attendanceType);
+    openDrawer();
+    setDrawerGuestsLoading(true);
+    const result = await fetchAllGuests();
+    setDrawerGuests(Array.isArray(result.data) ? result.data : []);
+    setDrawerGuestsLoading(false);
+  }, [openDrawer]);
+
+  const openCeremonyInvite = useCallback(() => open('ceremony'), [open]);
+  const openReceptionInvite = useCallback(() => open('reception'), [open]);
+
+  // Combine freshly fetched guests with any newly created ones this session
+  const allAvailableGuests = [...drawerGuests, ...newlyCreatedGuests];
+
+  // Guests already assigned to any invite cannot be added to a new one
+  const allAssignedIds = new Set(invites.flatMap((inv) => inv.guest || []));
+
   const guestOptions = allAvailableGuests
-    .filter((guest) => guest.id && guest.name)
+    .filter((guest) => guest.id && guest.name && !allAssignedIds.has(guest.id))
     .map((guest) => ({
       value: guest.id,
       label: guest.name,
@@ -136,6 +155,7 @@ export default function InviteManager({ invitesData, guestsData }) {
     setInviteAttendance('ceremony');
     setSelectedGuests([]);
     setNewlyCreatedGuests([]);
+    setDrawerGuests([]);
     setShowNewGuestForm(false);
     setNewGuestFirstname('');
     setNewGuestSurname('');
@@ -182,7 +202,7 @@ export default function InviteManager({ invitesData, guestsData }) {
       <Drawer
         opened={opened}
         onClose={handleClose}
-        title={<Text fw={700} size="xl" c="var(--custom-theme-heading)" ff="heading">Create New Invite</Text>}
+        title={<Text fw={700} size="xl" c="var(--custom-theme-heading)" ff="heading">Create {inviteAttendance === 'ceremony' ? 'Ceremony' : 'Reception'} Invite</Text>}
         position="right"
         size="md"
         styles={{
@@ -225,12 +245,13 @@ export default function InviteManager({ invitesData, guestsData }) {
 
           <MultiSelect
             label="Select Existing Guests"
-            placeholder="Choose guests for this invite"
+            placeholder={drawerGuestsLoading ? 'Loading guests…' : guestOptions.length === 0 ? 'No unassigned guests available' : 'Choose guests for this invite'}
             data={guestOptions}
             value={selectedGuests}
             onChange={setSelectedGuests}
             searchable
             clearable
+            disabled={drawerGuestsLoading}
             comboboxProps={{ zIndex: 1000 }}
             styles={labelStyles}
           />
@@ -404,9 +425,17 @@ export default function InviteManager({ invitesData, guestsData }) {
           <Button
             leftSection={<IconPlus size={18} />}
             color="var(--custom-theme-heading)"
-            onClick={open}
+            onClick={openCeremonyInvite}
           >
-            Create Invite
+            Create Ceremony Invite
+          </Button>
+          <Button
+            leftSection={<IconPlus size={18} />}
+            color="var(--custom-theme-heading)"
+            variant="outline"
+            onClick={openReceptionInvite}
+          >
+            Create Reception Invite
           </Button>
         </Group>
       </Group>

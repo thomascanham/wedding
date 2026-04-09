@@ -12,7 +12,7 @@ import getGuestInitials from '@/lib/getGuestInitials';
 import { deleteGuest, toggleGuestHoop } from '@/actions/guestActions';
 import { sendEmailToGuest } from '@/actions/emailActions';
 
-export function GuestCard({ guest }) {
+export function GuestCard({ guest, onInvite = false }) {
   const router = useRouter();
   const [opened, { open, close }] = useDisclosure(false);
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
@@ -282,7 +282,7 @@ export function GuestCard({ guest }) {
           {attendance}
         </Text>
 
-        <StatusIcons guest={guest} hoop={hoop} />
+        <StatusIcons guest={guest} hoop={hoop} onInvite={onInvite} />
 
         <Button fullWidth my="md" onClick={open} color='var(--custom-theme-heading)' variant='outline' ff="text">
           View Guest
@@ -410,7 +410,7 @@ function GuestDrawerContent({ guest, onDelete, onEmail, hoop, hoopLoading, onTog
   );
 }
 
-function StatusIcons({ guest, hoop }) {
+function StatusIcons({ guest, hoop, onInvite }) {
   const hasReplied = !!guest.rsvpStatus;
   const isAttending = guest.rsvpStatus === 'attending';
   const hasCheckedIn = guest.hasCheckedIn;
@@ -451,6 +451,18 @@ function StatusIcons({ guest, hoop }) {
         <ThemeIcon variant="transparent" size="md" color={hoop ? 'green' : 'gray'}>
           <IconCircle style={{ width: '70%', height: '70%' }} />
         </ThemeIcon>
+      </Tooltip>
+
+      <Tooltip label={onInvite ? 'On an invite' : 'Not on an invite'}>
+        <Box
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: '50%',
+            backgroundColor: onInvite ? 'var(--mantine-color-green-6)' : 'var(--mantine-color-gray-4)',
+            flexShrink: 0,
+          }}
+        />
       </Tooltip>
     </Group>
   )
