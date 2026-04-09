@@ -120,6 +120,7 @@ export default function GuestList({ data, assignedGuestIds = [] }) {
       setHoop(!hoop);
     }
     setHoopLoading(false);
+    router.refresh();
   };
 
   const getRsvpBadge = (guest) => {

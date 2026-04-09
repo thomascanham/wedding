@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Paper,
@@ -34,6 +34,9 @@ export default function InviteCard({ invite, allGuests, allInvites = [] }) {
   const [loading, setLoading] = useState(false);
   const [qrLoading, setQrLoading] = useState(false);
   const [qrSvg, setQrSvg] = useState(invite.qr_svg || null);
+  useEffect(() => {
+    setQrSvg(invite.qr_svg || null);
+  }, [invite.qr_svg]);
 
   const expandedGuests = invite.expand?.guest || [];
   const guestCount = expandedGuests.length;

@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Avatar, Button, Paper, Text, Group, ThemeIcon, Tooltip, Drawer, Stack, Badge, Box, SimpleGrid, Modal, TextInput, Alert } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -24,6 +24,7 @@ export function GuestCard({ guest, onInvite = false }) {
   const [emailSuccess, setEmailSuccess] = useState(false);
   const [hoop, setHoop] = useState(guest.hoop);
   const [hoopLoading, setHoopLoading] = useState(false);
+  useEffect(() => { setHoop(guest.hoop); }, [guest.hoop]);
   const attendance = guest.attendanceType === 'reception' ? 'Reception' : 'Ceremony';
   const initials = getGuestInitials(guest.firstname, guest.surname);
 
@@ -34,6 +35,7 @@ export function GuestCard({ guest, onInvite = false }) {
       setHoop(!hoop);
     }
     setHoopLoading(false);
+    router.refresh();
   };
 
   const editor = useEditor({

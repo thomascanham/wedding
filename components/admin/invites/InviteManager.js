@@ -21,7 +21,8 @@ import {
   SegmentedControl,
 } from '@mantine/core';
 import { useDisclosure, useLocalStorage } from '@mantine/hooks';
-import { IconPlus, IconX, IconLayoutGrid, IconList, IconQrcode } from '@tabler/icons-react';
+import { IconPlus, IconX, IconLayoutGrid, IconList, IconQrcode, IconDownload } from '@tabler/icons-react';
+import JSZip from 'jszip';
 import { createInvite, generateAllQRCodes } from '@/actions/inviteActions';
 import { createGuest, fetchAllGuests } from '@/actions/guestActions';
 import InviteCard from './InviteCard';
@@ -42,6 +43,7 @@ export default function InviteManager({ invitesData, guestsData }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [qrAllLoading, setQrAllLoading] = useState(false);
+  const [zipLoading, setZipLoading] = useState(false);
   const [attendanceFilter, setAttendanceFilter] = useState('all');
 
   // Inline guest creation state
@@ -163,6 +165,26 @@ export default function InviteManager({ invitesData, guestsData }) {
     setNewGuestError(null);
     setError(null);
     close();
+  };
+
+  const handleDownloadAllQRCodes = async () => {
+    const invitesWithQr = invites.filter((inv) => inv.qr_svg);
+    if (invitesWithQr.length === 0) return;
+
+    setZipLoading(true);
+    const zip = new JSZip();
+    for (const invite of invitesWithQr) {
+      const filename = `${invite.name.replace(/[^a-z0-9_\-\s]/gi, '_')}.svg`;
+      zip.file(filename, invite.qr_svg);
+    }
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'qr-codes.zip';
+    a.click();
+    URL.revokeObjectURL(url);
+    setZipLoading(false);
   };
 
   const handleGenerateAllQRCodes = async () => {
@@ -421,6 +443,15 @@ export default function InviteManager({ invitesData, guestsData }) {
             loading={qrAllLoading}
           >
             Generate All QR Codes
+          </Button>
+          <Button
+            variant="outline"
+            leftSection={<IconDownload size={18} />}
+            color="var(--custom-theme-heading)"
+            onClick={handleDownloadAllQRCodes}
+            loading={zipLoading}
+          >
+            Download All QR Codes
           </Button>
           <Button
             leftSection={<IconPlus size={18} />}
