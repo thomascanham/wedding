@@ -62,6 +62,9 @@ export default function InviteManager({ invitesData, guestsData }) {
   const [drawerGuestsLoading, setDrawerGuestsLoading] = useState(false);
 
   const { data: invites = [], error: invitesError } = invitesData || {};
+  // Guests from the initial page load — used by InviteCard/InviteList for edit drawers
+  const { data: propGuests = [] } = guestsData || {};
+  const allPropGuests = Array.isArray(propGuests) ? propGuests : [];
 
   const open = useCallback(async (attendanceType = 'ceremony') => {
     setInviteAttendance(attendanceType);
@@ -75,13 +78,13 @@ export default function InviteManager({ invitesData, guestsData }) {
   const openCeremonyInvite = useCallback(() => open('ceremony'), [open]);
   const openReceptionInvite = useCallback(() => open('reception'), [open]);
 
-  // Combine freshly fetched guests with any newly created ones this session
-  const allAvailableGuests = [...drawerGuests, ...newlyCreatedGuests];
+  // For the create drawer: freshly fetched guests + any newly created this session
+  const createDrawerGuests = [...drawerGuests, ...newlyCreatedGuests];
 
   // Guests already assigned to any invite cannot be added to a new one
   const allAssignedIds = new Set(invites.flatMap((inv) => inv.guest || []));
 
-  const guestOptions = allAvailableGuests
+  const guestOptions = createDrawerGuests
     .filter((guest) => guest.id && guest.name && !allAssignedIds.has(guest.id))
     .map((guest) => ({
       value: guest.id,
@@ -486,11 +489,11 @@ export default function InviteManager({ invitesData, guestsData }) {
           verticalSpacing={{ base: 'md', sm: 'xl' }}
         >
           {filteredInvites.map((invite) => (
-            <InviteCard key={invite.id} invite={invite} allGuests={allAvailableGuests} allInvites={invites} />
+            <InviteCard key={invite.id} invite={invite} allGuests={allPropGuests} allInvites={invites} />
           ))}
         </SimpleGrid>
       ) : (
-        <InviteList data={{ ...invitesData, data: filteredInvites }} allGuests={allAvailableGuests} allInvites={invites} />
+        <InviteList data={{ ...invitesData, data: filteredInvites }} allGuests={allPropGuests} allInvites={invites} />
       )}
     </>
   );
