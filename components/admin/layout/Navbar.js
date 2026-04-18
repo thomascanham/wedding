@@ -14,6 +14,7 @@ const navLinks = [
   { label: 'Seating', href: '/admin/seating', disabled: true },
   { label: 'Rooms', href: '/admin/rooms' },
   { label: 'Comms', href: '/admin/comms' },
+  { label: 'Reports', href: '/admin/reports' },
 ];
 
 export default function Navbar() {
@@ -29,18 +30,20 @@ export default function Navbar() {
 
   return (
     <nav className={classes.navbar}>
-      <Container>
-        <Group justify='space-between' py="md">
-          <Group align='center'>
-            <IconHearts size={28} className={classes.icon} />
+      <Container size="xl" px="xl">
+        <Group justify='space-between' py="md" wrap="nowrap">
+          <Group align='center' gap={0}>
+            <Link href="/admin" style={{ display: 'flex', alignItems: 'center' }}>
+              <IconHearts size={28} className={classes.icon} />
+            </Link>
 
             {/* Desktop Navigation */}
-            <Group className={classes.desktopNav}>
+            <Group className={classes.desktopNav} gap="xs" ml="md">
               {navLinks.map((link) => (
                 <Anchor
                   key={link.href}
-                  fz="lg"
-                  mx="lg"
+                  fz="md"
+                  px="xs"
                   fw={700}
                   underline='never'
                   component={link.disabled ? 'span' : Link}

@@ -11,6 +11,7 @@
 
 .icon {
   color: var(--custom-theme-text);
+  cursor: pointer;
 }
 
 .activeLink {
@@ -21,9 +22,9 @@
 .activeLink::after {
   content: '';
   position: absolute;
-  bottom: -4px;
-  left: 0;
-  right: 0;
+  bottom: -6px;
+  left: 4px;
+  right: 4px;
   height: 2px;
   background-color: var(--custom-theme-heading);
 }
@@ -43,8 +44,8 @@
   display: block;
 }
 
-/* Tablet and up (768px+) */
-@media (min-width: 768px) {
+/* Tablet and up (1100px+) */
+@media (min-width: 1100px) {
   .desktopNav {
     display: flex;
   }
