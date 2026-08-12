@@ -15,6 +15,7 @@ const navLinks = [
   { label: 'Rooms', href: '/admin/rooms' },
   { label: 'Comms', href: '/admin/comms' },
   { label: 'Reports', href: '/admin/reports' },
+  { label: 'Info', href: '/admin/info' },
 ];
 
 export default function Navbar() {
