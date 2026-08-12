@@ -1,7 +1,7 @@
 'use server';
 import { db } from "@/database";
 import { guests } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, isNotNull, asc } from "drizzle-orm";
 import crypto from "crypto";
 import { sendRsvpNotification } from "@/actions/emailActions";
 
@@ -147,6 +147,19 @@ export async function submitReceptionRsvp(id, { attending, eveningMeal, dietry, 
     return { data: record, error: false };
   } catch (error) {
     return { data: null, error: { message: error.message } };
+  }
+}
+
+export async function fetchSongRequests() {
+  try {
+    const records = await db
+      .select({ id: guests.id, firstname: guests.firstname, surname: guests.surname, songRequest: guests.songRequest })
+      .from(guests)
+      .where(isNotNull(guests.songRequest))
+      .orderBy(asc(guests.surname), asc(guests.firstname));
+    return { data: records, error: false };
+  } catch (error) {
+    return { data: [], error: { message: error.message } };
   }
 }
 

@@ -1,6 +1,6 @@
-import { Paper, Title, SimpleGrid, Card, Text, Group, ThemeIcon, Stack, RingProgress } from "@mantine/core";
-import { IconCake, IconToolsKitchen2 } from "@tabler/icons-react";
-import { fetchAllGuests } from "@/actions/guestActions";
+import { Paper, Title, SimpleGrid, Card, Text, Group, ThemeIcon, Stack, RingProgress, Badge } from "@mantine/core";
+import { IconCake, IconToolsKitchen2, IconMusic } from "@tabler/icons-react";
+import { fetchAllGuests, fetchSongRequests } from "@/actions/guestActions";
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +16,7 @@ const EVENING_MEALS = [
 
 export default async function AdminReports() {
   const { data: guests } = await fetchAllGuests();
+  const { data: songRequests } = await fetchSongRequests();
 
   const allGuests = Array.isArray(guests) ? guests : [];
 
@@ -119,6 +120,36 @@ export default async function AdminReports() {
             );
           })}
         </SimpleGrid>
+      </Stack>
+      <Stack gap="xs">
+        <Group gap="xs" align="center">
+          <IconMusic size={15} color="var(--custom-theme-heading)" />
+          <Text fz="sm" fw={700} ff="heading" c="var(--custom-theme-heading)">Song Requests</Text>
+          <Badge variant="light" color="dark" size="sm" radius="sm">{songRequests.length}</Badge>
+        </Group>
+
+        {songRequests.length === 0 ? (
+          <Text fz="sm" c="dimmed" ff="text">No song requests yet.</Text>
+        ) : (
+          <Card withBorder shadow="sm" radius="md" p={0} style={{ borderColor: 'var(--custom-theme-fill)', overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--custom-theme-fill)' }}>
+                  <th style={{ padding: '0.65rem 1rem', textAlign: 'left', color: 'var(--custom-theme-heading)', fontWeight: 600, fontSize: '0.8rem', background: '#faf7f3' }}>Guest</th>
+                  <th style={{ padding: '0.65rem 1rem', textAlign: 'left', color: 'var(--custom-theme-heading)', fontWeight: 600, fontSize: '0.8rem', background: '#faf7f3' }}>Song Request</th>
+                </tr>
+              </thead>
+              <tbody>
+                {songRequests.map((g, i) => (
+                  <tr key={g.id} style={{ borderBottom: i < songRequests.length - 1 ? '1px solid var(--custom-theme-fill)' : 'none', background: i % 2 === 0 ? '#fff' : '#fdf8f0' }}>
+                    <td style={{ padding: '0.65rem 1rem', fontWeight: 500, color: 'var(--custom-theme-text)' }}>{g.surname}, {g.firstname}</td>
+                    <td style={{ padding: '0.65rem 1rem', color: '#7a6248' }}>{g.songRequest}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        )}
       </Stack>
     </Paper>
   );
