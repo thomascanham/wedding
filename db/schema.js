@@ -10,6 +10,7 @@ export const guests = mysqlTable('guests', {
   rsvpStatus: varchar('rsvpStatus', { length: 255 }),
   hasCheckedIn: boolean('hasCheckedIn').default(false),
   hoop: boolean('hoop').default(false),
+  seatNumber: varchar('seatNumber', { length: 255 }),
   phone: varchar('phone', { length: 255 }),
   email: varchar('email', { length: 255 }),
   starter: varchar('starter', { length: 255 }),

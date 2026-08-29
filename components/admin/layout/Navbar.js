@@ -11,7 +11,7 @@ const navLinks = [
   { label: 'Dashboard', href: '/admin' },
   { label: 'Guests', href: '/admin/guests' },
   { label: 'Invites', href: '/admin/invites' },
-  { label: 'Seating', href: '/admin/seating', disabled: true },
+  { label: 'Seating', href: '/admin/seating' },
   { label: 'Rooms', href: '/admin/rooms' },
   { label: 'Comms', href: '/admin/comms' },
   { label: 'Reports', href: '/admin/reports' },

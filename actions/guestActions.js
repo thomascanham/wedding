@@ -1,7 +1,7 @@
 'use server';
 import { db } from "@/database";
 import { guests } from "@/db/schema";
-import { eq, isNotNull, asc } from "drizzle-orm";
+import { eq, and, ne, isNotNull, asc } from "drizzle-orm";
 import crypto from "crypto";
 import { sendRsvpNotification } from "@/actions/emailActions";
 
@@ -61,6 +61,37 @@ export async function toggleGuestHoop(id, currentValue) {
   try {
     await db.update(guests)
       .set({ hoop: !currentValue, updated: new Date().toISOString() })
+      .where(eq(guests.id, id));
+    const [record] = await db.select().from(guests).where(eq(guests.id, id));
+    return {
+      data: record,
+      error: false,
+    }
+  } catch (error) {
+    return {
+      data: null,
+      error: { message: error.message },
+    }
+  }
+}
+
+export async function updateGuestSeatNumber(id, seatNumber) {
+  try {
+    const trimmed = seatNumber ? seatNumber.trim() : '';
+
+    if (trimmed) {
+      const [existing] = await db.select().from(guests)
+        .where(and(eq(guests.seatNumber, trimmed), ne(guests.id, id)));
+      if (existing) {
+        return {
+          data: null,
+          error: { message: `Seat ${trimmed} is already assigned to ${existing.name}` },
+        }
+      }
+    }
+
+    await db.update(guests)
+      .set({ seatNumber: trimmed || null, updated: new Date().toISOString() })
       .where(eq(guests.id, id));
     const [record] = await db.select().from(guests).where(eq(guests.id, id));
     return {

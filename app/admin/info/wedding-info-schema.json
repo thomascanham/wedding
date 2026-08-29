@@ -1,0 +1,178 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Wedding Info",
+  "description": "Schema of the wedding-day decisions and choices collected on the /admin/info page, for use as a single source of truth to share with the venue, registrars, and suppliers.",
+  "type": "object",
+  "properties": {
+    "guestCounts": {
+      "type": "object",
+      "description": "Derived from confirmed guest RSVPs (guests table), not directly editable on this page.",
+      "properties": {
+        "ceremonyAttending": { "type": "integer", "description": "Guests with attendanceType='ceremony' and rsvpStatus='attending'." },
+        "receptionAttending": { "type": "integer", "description": "Guests with attendanceType='reception' and rsvpStatus='attending'." },
+        "hogRoastCount": { "type": "integer", "description": "Guests with eveningMeal='Hog Roast'." },
+        "vegetarianCount": { "type": "integer", "description": "Guests with eveningMeal='Vegetarian / Vegan'." }
+      }
+    },
+    "bridalParty": {
+      "type": "array",
+      "description": "Bridal party members. Breakfast choice needed 2 weeks before the wedding.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": ["string", "null"], "maxLength": 255 },
+          "role": { "type": ["string", "null"], "maxLength": 255, "example": "Maid of Honor" },
+          "breakfastChoice": { "type": ["string", "null"], "maxLength": 255, "example": "Full English" },
+          "created": { "type": "string", "format": "date-time" },
+          "updated": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "groomsmen": {
+      "type": "array",
+      "description": "Groomsmen. Breakfast choice needed 2 weeks before the wedding.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": ["string", "null"], "maxLength": 255 },
+          "role": { "type": ["string", "null"], "maxLength": 255 },
+          "breakfastChoice": { "type": ["string", "null"], "maxLength": 255 },
+          "created": { "type": "string", "format": "date-time" },
+          "updated": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "ceremony": {
+      "type": "object",
+      "properties": {
+        "masterOfCeremonies": { "type": ["string", "null"], "maxLength": 255, "description": "Name of the guest acting as Master of Ceremonies." },
+        "ceremonyMusicGuest": { "type": ["string", "null"], "maxLength": 255, "description": "Name of the guest responsible for playing music during the ceremony." },
+        "aisleWalkSong": { "type": ["string", "null"], "maxLength": 255, "example": "Canon in D" },
+        "signingSong": { "type": ["string", "null"], "maxLength": 255, "description": "Song played during the signing of the register.", "example": "A Thousand Years" },
+        "exitSong": { "type": ["string", "null"], "maxLength": 255, "example": "Marry You" },
+        "aisleWalkOrder": {
+          "type": "array",
+          "description": "Ordered list of the bridal party as they will walk down the aisle.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "format": "uuid" },
+              "name": { "type": ["string", "null"], "maxLength": 255 },
+              "position": { "type": "integer", "default": 0 },
+              "created": { "type": "string", "format": "date-time" },
+              "updated": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      }
+    },
+    "daytime": {
+      "type": "object",
+      "properties": {
+        "welcomeDrinksCount": { "type": ["string", "null"], "maxLength": 255, "example": "60" },
+        "nonAlcoholicWelcomeDrinksCount": { "type": ["string", "null"], "maxLength": 255, "example": "15" },
+        "toastingDrinksCount": { "type": ["string", "null"], "maxLength": 255, "example": "60" },
+        "nonAlcoholicToastingDrinksCount": { "type": ["string", "null"], "maxLength": 255, "example": "15" },
+        "canapes": {
+          "type": "array",
+          "description": "Chosen canapés.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "format": "uuid" },
+              "name": { "type": ["string", "null"], "maxLength": 255, "example": "Mini Yorkshire Puddings" },
+              "created": { "type": "string", "format": "date-time" },
+              "updated": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "checklist": {
+          "type": "array",
+          "description": "Daytime to-do checklist.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "format": "uuid" },
+              "name": { "type": ["string", "null"], "maxLength": 255, "example": "Confirm table plan with venue" },
+              "completed": { "type": "boolean", "default": false },
+              "created": { "type": "string", "format": "date-time" },
+              "updated": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "speechOrder": {
+          "type": "array",
+          "description": "Ordered list of speeches and who is giving them.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "format": "uuid" },
+              "name": { "type": ["string", "null"], "maxLength": 255 },
+              "position": { "type": "integer", "default": 0 },
+              "created": { "type": "string", "format": "date-time" },
+              "updated": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      }
+    },
+    "evening": {
+      "type": "object",
+      "properties": {
+        "firstDanceSong": { "type": ["string", "null"], "maxLength": 255, "example": "Perfect" },
+        "dj": {
+          "type": "object",
+          "properties": {
+            "djName": { "type": ["string", "null"], "maxLength": 255 },
+            "djArrivalTime": { "type": ["string", "null"], "maxLength": 255, "description": "Set-up arrival time.", "example": "4:00pm" },
+            "djStartTime": { "type": ["string", "null"], "maxLength": 255, "example": "7:00pm" },
+            "boothMeasurements": { "type": ["string", "null"], "maxLength": 255, "example": "2m x 2m" },
+            "djContractProvided": { "type": "boolean", "default": false }
+          }
+        },
+        "djSetlists": {
+          "type": "array",
+          "description": "Guest DJs and whether they have handed in their setlist.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "format": "uuid" },
+              "name": { "type": ["string", "null"], "maxLength": 255, "description": "Guest DJ name." },
+              "submitted": { "type": "boolean", "default": false, "description": "Whether the setlist has been handed in." },
+              "created": { "type": "string", "format": "date-time" },
+              "updated": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "cake": {
+          "type": "object",
+          "properties": {
+            "cakeCut": { "type": ["string", "null"], "maxLength": 255, "example": "Yes, after speeches" },
+            "cakeBigFlavour": { "type": ["string", "null"], "maxLength": 255, "example": "Chocolate Fudge" },
+            "cakeMediumFlavour": { "type": ["string", "null"], "maxLength": 255, "example": "Lemon Drizzle" },
+            "cakeSmallFlavour": { "type": ["string", "null"], "maxLength": 255, "example": "Victoria Sponge" },
+            "cakeAmountSaved": { "type": ["string", "null"], "maxLength": 255, "example": "One tier for anniversary" }
+          }
+        },
+        "sweetCart": { "type": ["string", "null"], "maxLength": 255, "example": "Yes" },
+        "baristas": { "type": ["string", "null"], "maxLength": 255, "example": "Yes" }
+      }
+    },
+    "suppliers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": ["string", "null"], "maxLength": 255 },
+          "role": { "type": ["string", "null"], "maxLength": 255, "description": "Profession / role.", "example": "Florist" },
+          "contactInfo": { "type": ["string", "null"], "maxLength": 255, "example": "07700 900123" },
+          "created": { "type": "string", "format": "date-time" },
+          "updated": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  }
+}

@@ -7,9 +7,9 @@ import { RichTextEditor, Link } from '@mantine/tiptap';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
-import { IconMapPin, IconMapPinFilled, IconUser, IconUserCheck, IconUserOff, IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle, IconTrash, IconSend, IconCircle, IconMusic } from '@tabler/icons-react';
+import { IconMapPin, IconMapPinFilled, IconUser, IconUserCheck, IconUserOff, IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle, IconTrash, IconSend, IconCircle, IconMusic, IconArmchair, IconDeviceFloppy } from '@tabler/icons-react';
 import getGuestInitials from '@/lib/getGuestInitials';
-import { deleteGuest, toggleGuestHoop } from '@/actions/guestActions';
+import { deleteGuest, toggleGuestHoop, updateGuestSeatNumber } from '@/actions/guestActions';
 import { sendEmailToGuest } from '@/actions/emailActions';
 
 export function GuestCard({ guest, onInvite = false }) {
@@ -25,6 +25,10 @@ export function GuestCard({ guest, onInvite = false }) {
   const [hoop, setHoop] = useState(guest.hoop);
   const [hoopLoading, setHoopLoading] = useState(false);
   useEffect(() => { setHoop(guest.hoop); }, [guest.hoop]);
+  const [seatNumber, setSeatNumber] = useState(guest.seatNumber || '');
+  const [seatNumberLoading, setSeatNumberLoading] = useState(false);
+  const [seatNumberError, setSeatNumberError] = useState(null);
+  useEffect(() => { setSeatNumber(guest.seatNumber || ''); }, [guest.seatNumber]);
   const attendance = guest.attendanceType === 'reception' ? 'Reception' : 'Ceremony';
   const initials = getGuestInitials(guest.firstname, guest.surname);
 
@@ -35,6 +39,18 @@ export function GuestCard({ guest, onInvite = false }) {
       setHoop(!hoop);
     }
     setHoopLoading(false);
+    router.refresh();
+  };
+
+  const handleSaveSeatNumber = async () => {
+    setSeatNumberLoading(true);
+    setSeatNumberError(null);
+    const response = await updateGuestSeatNumber(guest.id, seatNumber.trim());
+    setSeatNumberLoading(false);
+    if (response.error) {
+      setSeatNumberError(response.error.message);
+      return;
+    }
     router.refresh();
   };
 
@@ -266,7 +282,19 @@ export function GuestCard({ guest, onInvite = false }) {
           },
         }}
       >
-        <GuestDrawerContent guest={guest} onDelete={openDeleteModal} onEmail={openEmailModal} hoop={hoop} hoopLoading={hoopLoading} onToggleHoop={handleToggleHoop} />
+        <GuestDrawerContent
+          guest={guest}
+          onDelete={openDeleteModal}
+          onEmail={openEmailModal}
+          hoop={hoop}
+          hoopLoading={hoopLoading}
+          onToggleHoop={handleToggleHoop}
+          seatNumber={seatNumber}
+          onSeatNumberChange={(value) => { setSeatNumber(value); setSeatNumberError(null); }}
+          seatNumberLoading={seatNumberLoading}
+          seatNumberError={seatNumberError}
+          onSaveSeatNumber={handleSaveSeatNumber}
+        />
       </Drawer>
 
       <Paper shadow="md" radius="md" withBorder p="lg" bg="white" style={{ border: '2px solid var(--custom-theme-heading)' }}>
@@ -294,7 +322,7 @@ export function GuestCard({ guest, onInvite = false }) {
   );
 }
 
-function GuestDrawerContent({ guest, onDelete, onEmail, hoop, hoopLoading, onToggleHoop }) {
+function GuestDrawerContent({ guest, onDelete, onEmail, hoop, hoopLoading, onToggleHoop, seatNumber, onSeatNumberChange, seatNumberLoading, seatNumberError, onSaveSeatNumber }) {
   const attendance = guest.attendanceType === 'reception' ? 'Reception' : 'Ceremony';
 
   const getRsvpColor = () => {
@@ -343,6 +371,33 @@ function GuestDrawerContent({ guest, onDelete, onEmail, hoop, hoopLoading, onTog
           </Group>
         </Box>
       </SimpleGrid>
+
+      {/* Seating */}
+      <Box style={section}>
+        <Text {...sectionLabel}>Seat Number</Text>
+        <Group gap="xs" align="flex-end">
+          <TextInput
+            leftSection={<IconArmchair size={15} color="var(--mantine-color-gray-5)" />}
+            placeholder="e.g., 12"
+            value={seatNumber}
+            onChange={(e) => onSeatNumberChange(e.target.value)}
+            error={seatNumberError}
+            flex={1}
+          />
+          <Button
+            size="sm"
+            variant="light"
+            color="var(--custom-theme-heading)"
+            leftSection={<IconDeviceFloppy size={15} />}
+            onClick={onSaveSeatNumber}
+            loading={seatNumberLoading}
+            disabled={(guest.seatNumber || '') === seatNumber}
+            ff="text"
+          >
+            Save
+          </Button>
+        </Group>
+      </Box>
 
       {/* Contact */}
       <Box style={section}>

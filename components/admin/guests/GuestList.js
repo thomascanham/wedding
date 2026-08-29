@@ -7,9 +7,9 @@ import { RichTextEditor, Link } from '@mantine/tiptap';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
-import { IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle, IconTrash, IconSend, IconMusic } from '@tabler/icons-react';
+import { IconPhone, IconMail, IconToolsKitchen2, IconAlertCircle, IconTrash, IconSend, IconMusic, IconArmchair, IconDeviceFloppy } from '@tabler/icons-react';
 import getGuestInitials from '@/lib/getGuestInitials';
-import { deleteGuest, toggleGuestHoop } from '@/actions/guestActions';
+import { deleteGuest, toggleGuestHoop, updateGuestSeatNumber } from '@/actions/guestActions';
 import { sendEmailToGuest } from '@/actions/emailActions';
 
 export default function GuestList({ data, assignedGuestIds = [] }) {
@@ -26,6 +26,9 @@ export default function GuestList({ data, assignedGuestIds = [] }) {
   const [emailSuccess, setEmailSuccess] = useState(false);
   const [hoop, setHoop] = useState(false);
   const [hoopLoading, setHoopLoading] = useState(false);
+  const [seatNumber, setSeatNumber] = useState('');
+  const [seatNumberLoading, setSeatNumberLoading] = useState(false);
+  const [seatNumberError, setSeatNumberError] = useState(null);
 
   const editor = useEditor({
     extensions: [
@@ -109,6 +112,8 @@ export default function GuestList({ data, assignedGuestIds = [] }) {
   const handleRowClick = (guest) => {
     setSelectedGuest(guest);
     setHoop(guest.hoop);
+    setSeatNumber(guest.seatNumber || '');
+    setSeatNumberError(null);
     open();
   };
 
@@ -120,6 +125,19 @@ export default function GuestList({ data, assignedGuestIds = [] }) {
       setHoop(!hoop);
     }
     setHoopLoading(false);
+    router.refresh();
+  };
+
+  const handleSaveSeatNumber = async () => {
+    if (!selectedGuest) return;
+    setSeatNumberLoading(true);
+    setSeatNumberError(null);
+    const response = await updateGuestSeatNumber(selectedGuest.id, seatNumber.trim());
+    setSeatNumberLoading(false);
+    if (response.error) {
+      setSeatNumberError(response.error.message);
+      return;
+    }
     router.refresh();
   };
 
@@ -156,6 +174,11 @@ export default function GuestList({ data, assignedGuestIds = [] }) {
             </Avatar>
             <Text fw={500} ff="text" c="var(--custom-theme-heading)">{guest.name}</Text>
           </Group>
+        </Table.Td>
+        <Table.Td>
+          <Text size="sm" ff="text" c={guest.seatNumber ? 'var(--custom-theme-text)' : 'dimmed'} fs={guest.seatNumber ? undefined : 'italic'}>
+            {guest.seatNumber || '—'}
+          </Text>
         </Table.Td>
         <Table.Td>
           <Badge color="var(--custom-theme-heading)" variant="light" size="sm" ff="text">
@@ -366,7 +389,21 @@ export default function GuestList({ data, assignedGuestIds = [] }) {
           },
         }}
       >
-        {selectedGuest && <GuestDrawerContent guest={selectedGuest} onDelete={openDeleteModal} onEmail={handleOpenEmailModal} hoop={hoop} hoopLoading={hoopLoading} onToggleHoop={handleToggleHoop} />}
+        {selectedGuest && (
+          <GuestDrawerContent
+            guest={selectedGuest}
+            onDelete={openDeleteModal}
+            onEmail={handleOpenEmailModal}
+            hoop={hoop}
+            hoopLoading={hoopLoading}
+            onToggleHoop={handleToggleHoop}
+            seatNumber={seatNumber}
+            onSeatNumberChange={(value) => { setSeatNumber(value); setSeatNumberError(null); }}
+            seatNumberLoading={seatNumberLoading}
+            seatNumberError={seatNumberError}
+            onSaveSeatNumber={handleSaveSeatNumber}
+          />
+        )}
       </Drawer>
 
       <Table.ScrollContainer minWidth={500} py="xl">
@@ -391,6 +428,7 @@ export default function GuestList({ data, assignedGuestIds = [] }) {
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Name</Table.Th>
+              <Table.Th>Seat</Table.Th>
               <Table.Th>Guest Type</Table.Th>
               <Table.Th>RSVP</Table.Th>
               <Table.Th>Checked In</Table.Th>
@@ -405,7 +443,7 @@ export default function GuestList({ data, assignedGuestIds = [] }) {
   );
 }
 
-function GuestDrawerContent({ guest, onDelete, onEmail, hoop, hoopLoading, onToggleHoop }) {
+function GuestDrawerContent({ guest, onDelete, onEmail, hoop, hoopLoading, onToggleHoop, seatNumber, onSeatNumberChange, seatNumberLoading, seatNumberError, onSaveSeatNumber }) {
   const attendance = guest.attendanceType === 'reception' ? 'Reception' : 'Ceremony';
 
   const getRsvpColor = () => {
@@ -454,6 +492,33 @@ function GuestDrawerContent({ guest, onDelete, onEmail, hoop, hoopLoading, onTog
           </Group>
         </Box>
       </SimpleGrid>
+
+      {/* Seating */}
+      <Box style={section}>
+        <Text {...sectionLabel}>Seat Number</Text>
+        <Group gap="xs" align="flex-end">
+          <TextInput
+            leftSection={<IconArmchair size={15} color="var(--mantine-color-gray-5)" />}
+            placeholder="e.g., 12"
+            value={seatNumber}
+            onChange={(e) => onSeatNumberChange(e.target.value)}
+            error={seatNumberError}
+            flex={1}
+          />
+          <Button
+            size="sm"
+            variant="light"
+            color="var(--custom-theme-heading)"
+            leftSection={<IconDeviceFloppy size={15} />}
+            onClick={onSaveSeatNumber}
+            loading={seatNumberLoading}
+            disabled={(guest.seatNumber || '') === seatNumber}
+            ff="text"
+          >
+            Save
+          </Button>
+        </Group>
+      </Box>
 
       {/* Contact */}
       <Box style={section}>

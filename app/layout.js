@@ -3,6 +3,7 @@ import "@mantine/tiptap/styles.css";
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from "@mantine/core";
 import { Playfair_Display, Raleway } from "next/font/google";
 import Footer from "@/components/layout/Footer";
+import DevBanner from "@/components/layout/DevBanner";
 import "./globals.css";
 
 const playfairDisplay = Playfair_Display({
@@ -30,6 +31,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className={`${playfairDisplay.variable} ${raleway.variable}`}>
         <MantineProvider>
+          <DevBanner />
           {children}
           <Footer />
         </MantineProvider>
