@@ -43,3 +43,7 @@ next-env.d.ts
 
 # db backups
 /backups
+
+# live data exports
+/live
+/scripts/export-live-seating.js
