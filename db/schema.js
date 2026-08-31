@@ -148,6 +148,13 @@ export const daytimeChecklist = mysqlTable('daytime_checklist', {
   updated: varchar('updated', { length: 255 }).$defaultFn(() => new Date().toISOString()),
 });
 
+export const seatingTables = mysqlTable('seating_tables', {
+  tableIndex: int('tableIndex').primaryKey(),
+  name: varchar('name', { length: 255 }),
+  created: varchar('created', { length: 255 }).$defaultFn(() => new Date().toISOString()),
+  updated: varchar('updated', { length: 255 }).$defaultFn(() => new Date().toISOString()),
+});
+
 export const adminUsers = mysqlTable('admin_users', {
   id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
   email: varchar('email', { length: 255 }).notNull(),
